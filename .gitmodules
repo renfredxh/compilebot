@@ -1,0 +1,3 @@
+[submodule "lib/ideone-api"]
+	path = lib/ideone-api
+	url = https://github.com/renfredxh/ideone-api.git
