@@ -4,4 +4,5 @@
   "ideone_user": "<your ideone username>",
   "ideone_pass": "<your ideone password>",
   "admin_user": "<optional reddit username for receiving admin alerts>"
+  "user_agent": "Code compilation bot tester /u/<your reddit username>"
 }

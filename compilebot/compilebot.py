@@ -183,10 +183,11 @@ I_USERNAME = SETTINGS['ideone_user']
 I_PASSWORD = SETTINGS['ideone_pass']
 R_USERNAME = SETTINGS['reddit_user']
 R_PASSWORD = SETTINGS['reddit_pass']
+USER_AGENT = SETTINGS['user_agent']
+ADMIN = SETTINGS['admin_user']
 
 def main():
-    r = praw.Reddit('Code compilation bot by u/SeaCowVengeance v 0.1.'
-                    'url: https://github.com/renfredxh/compilebot')
+    r = praw.Reddit(USER_AGENT)
     r.login(R_USERNAME, R_PASSWORD)
     process_inbox(r)
     
