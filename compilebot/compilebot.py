@@ -73,10 +73,12 @@ def format_reply(details, opts):
     return reply
 
 def parse_comment(body):
-    c_pattern = (r'/u/CompileBot(?P<args>.*)\n\s*'
-                 r'(?<=\n {4})(?P<src>.*(\n( {4}.*\n)*( {4}.*))?)'
-                 r'(\n\s*((?i)Input|Stdin):?\n\s*'
-                 r'(?<=\n {4})(?P<in>.*(\n( {4}.*\n)*( {4}.*\n?))?))?')
+    c_pattern = (
+        r'/u/(?i)%s(?P<args>.*)\n\s*'
+        r'(?<=\n {4})(?P<src>.*(\n( {4}.*\n)*( {4}.*))?)'
+        r'(\n\s*((?i)Input|Stdin):?\n\s*'
+        r'(?<=\n {4})(?P<in>.*(\n( {4}.*\n)*( {4}.*\n?))?))?'
+    ) % R_USERNAME
     m = re.search(c_pattern, body)
     args, src, stdin = m.group('args'), m.group('src'), m.group('in') or ''
     return args, src, stdin
