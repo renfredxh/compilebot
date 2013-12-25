@@ -82,7 +82,15 @@ def parse_new(comment):
     src = src.replace('\n    ', '\n')
     details = compile(src, lang)
     return format_reply(details)
+    try:
+        details = compile(src, lang, stdin=stdin)
+    except ideone.IdeoneError as e:
+        msg = str(e)
+        # TODO Add link to accepted languages to msg
+        log("Language error on comment {}".format(comment.id))
+        return None, msg
     reply = format_reply(details, opts)
+    return reply, pm
 
 def reply_to(comment, text):
     # Truncate message if it exceeds max character limit.
@@ -109,9 +117,12 @@ def process_inbox(r):
     inbox = r.get_unread()
     for new in inbox:
         try:
-            reply = parse_new(new)
+            reply, pm = parse_new(new)
             if reply: 
                 reply_to(new, reply) 
+            if pm:
+                # TODO send direct PM
+                reply_to(new, pm)
         except:
             # Notify of any errors
             log("Error processing comment {}\n{}".format(new.id, 
