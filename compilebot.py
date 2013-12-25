@@ -27,7 +27,7 @@ def compile(source, lang):
     # finished executing. A status of 0 indicates the submission is finished.
     while details['status'] != 0:
         details = i.submission_details(sub_link)
-        time.sleep(2)
+        time.sleep(3)
     return details
 
 def format_reply(details):
