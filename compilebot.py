@@ -45,8 +45,22 @@ def format_reply(details):
 def parse_new(comment):
     c_pattern = r'/u/CompileBot(?P<args>.*)\n\s*\n(?P<source>( {4}.*\n)*( {4}.*))'
     m = re.search(c_pattern, comment.body)
-    lang = m.group('args').strip()
-    src = m.group('source')
+    try:
+        args = m.group('args')
+        src = m.group('source')
+    except AttributeError:
+        pm = "There was an error processing your comment."
+        # TODO send author a PM 
+        log("Formatting error on comment {}".format(comment.id))
+        return None, pm
+    # Seperate the language name from the rest of the supplied options
+    # TODO seperate args and lang in a more robust way
+    try:
+        lang, opts = args.split(' -', 1)
+        opts = ('-' + opts).split()
+    except ValueError:
+        lang, opts = args, []
+    lang = lang.strip()
     # Remove the leading four spaces from every line
     src = src.replace('    ', '', 1)
     src = src.replace('\n    ', '\n')
