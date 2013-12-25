@@ -30,24 +30,40 @@ def compile(source, lang):
         time.sleep(3)
     return details
 
-def format_reply(details):
+def format_reply(details, opts):
     reply = ''
-    if details['output']:
-        reply += 'Output:\n'
-        output = '\n' + details['output']
-        reply += output.replace('\n', '\n    ')
+    if '--echo' in opts:
+        reply += 'Source:\n\n{}\n'.format(
+            ('\n' + details['source']).replace('\n', '\n    '))
+    # Combine program output and runtime error output
+    output = details['output'] + details['stderr']
+    if output:
+        reply += 'Output:\n\n{}\n'.format(
+            ('\n' + output).replace('\n', '\n    '))
     if details['cmpinfo']:
-        reply += 'Compiler Message:\n'
-        output = '\n' + details['cmpinfo']
-        reply += output.replace('\n', '\n    ')
+        reply += 'Compiler Message:\n\n{}\n\n'.format(
+            details['cmpinfo'].replace('\n', '\n    '))
+    if '--date' in opts:
+        reply += "Date: {}\n\n".format(details['date'])
+    if '--memory' in opts:
+        reply += "Memory Usage: {}\n\n".format(details['memory'])
+    if '--time' in opts:
+        reply += "Execution Time: {} Seconds\n\n".format(details['time'])
+    if '--version' in opts:
+        reply += "Version: {}\n\n".format(details['langVersion']) 
     return reply
 
-def parse_new(comment):
-    c_pattern = r'/u/CompileBot(?P<args>.*)\n\s*\n(?P<source>( {4}.*\n)*( {4}.*))'
+def parse_new(comment):    
+    reply, pm = '', ''
+    c_pattern = (r'/u/CompileBot(?P<args>.*)\n\s*'
+                 r'(?<=\n {4})(?P<source>.*(\n( {4}.*\n)*( {4}.*))?)'
+                 r'(\n\s*((?i)Input|Stdin):?\n\s*'
+                 r'(?<=\n {4})(?P<input>.*(\n( {4}.*\n)*( {4}.*\n?))?))?')
     m = re.search(c_pattern, comment.body)
     try:
         args = m.group('args')
         src = m.group('source')
+        stdin = m.group('input') or '' 
     except AttributeError:
         pm = "There was an error processing your comment."
         # TODO send author a PM 
@@ -66,6 +82,7 @@ def parse_new(comment):
     src = src.replace('\n    ', '\n')
     details = compile(src, lang)
     return format_reply(details)
+    reply = format_reply(details, opts)
 
 def reply_to(comment, text):
     # Truncate message if it exceeds max character limit.
