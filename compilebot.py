@@ -65,7 +65,7 @@ def format_reply(details, opts):
     if '--memory' in opts:
         reply += "Memory Usage: {}\n\n".format(details['memory'])
     if '--time' in opts:
-        reply += "Execution Time: {} Seconds\n\n".format(details['time'])
+        reply += "Execution Time: {} seconds\n\n".format(details['time'])
     if '--version' in opts:
         reply += "Version: {}\n\n".format(details['langVersion']) 
     return reply
