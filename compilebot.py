@@ -49,9 +49,12 @@ def format_reply(details, opts):
     details along with optional additional information.
     """
     reply = ''
-    if '--echo' in opts:
+    if '--source' in opts:
         reply += 'Source:\n\n{}\n'.format(
             ('\n' + details['source']).replace('\n', '\n    '))
+    if '--input' in opts:
+        reply += 'Input:\n\n{}\n'.format(
+            ('\n' + details['input']).replace('\n', '\n    '))
     # Combine program output and runtime error output
     output = details['output'] + details['stderr']
     if output:
