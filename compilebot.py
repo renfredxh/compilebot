@@ -7,6 +7,9 @@ import json
 import traceback
 
 def log(message, alert=False):
+    """Log messages along with a timestamp in a log file. If the alert
+    option is set to true, send a message to the admin's reddit inbox.
+    """
     t = time.strftime('%m-%d %H:%M:%S', time.localtime())
     message = "{}: {}\n".format(t, message)
     with open('compilebot.log', 'a') as f:
@@ -16,8 +19,19 @@ def log(message, alert=False):
         pass
     
 def compile(source, lang, stdin=''):
-    """Execute source using the ideone API and return a dict containing
-    the output details""" 
+    """Compile and evaluate source sode using the ideone API and return
+    a dict containing the output details.
+    
+    Keyword arguments:
+    source -- a string containing source code to be compiled and evaluated
+    lang -- the programming language pertaining to the source code
+    stdin -- optional "standard input" for the program
+    
+    >>> d = compile('print("Hello World")', 'python')
+    >>> d['output']
+    Hello World
+
+    """ 
     # Login to ideone and create a submission
     i = ideone.Ideone(USERNAME, PASSWORD)
     sub = i.create_submission(source, language_name=lang, std_input=stdin)
@@ -31,6 +45,9 @@ def compile(source, lang, stdin=''):
     return details
 
 def format_reply(details, opts):
+    """Returns a reply that contains the output from a ideone submission's 
+    details along with optional additional information.
+    """
     reply = ''
     if '--echo' in opts:
         reply += 'Source:\n\n{}\n'.format(
@@ -53,7 +70,11 @@ def format_reply(details, opts):
         reply += "Version: {}\n\n".format(details['langVersion']) 
     return reply
 
-def parse_new(comment):    
+def parse_new(comment):
+    """Search comments for username mentions followed by code blocks
+    and return a formatted reply containing the output of the executed
+    block.
+    """  
     reply, pm = '', ''
     c_pattern = (r'/u/CompileBot(?P<args>.*)\n\s*'
                  r'(?<=\n {4})(?P<source>.*(\n( {4}.*\n)*( {4}.*))?)'
@@ -91,6 +112,7 @@ def parse_new(comment):
     return reply, pm
 
 def reply_to(comment, text):
+    """Reply to a reddit comment using the supplied text"""
     # Truncate message if it exceeds max character limit.
     if len(text) >= 10000:
         text = text[:9995] + '...'
@@ -108,6 +130,9 @@ def reply_to(comment, text):
         log("Exception on comment {}, {}".format(comment.id, e))
 
 def process_inbox(r):
+    """Iterate through each unread message/comment in the inbox, parse it
+    and reply to it appropriately.
+    """
     inbox = r.get_unread()
     for new in inbox:
         try:
