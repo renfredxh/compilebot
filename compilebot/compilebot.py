@@ -73,21 +73,23 @@ def format_reply(details, opts):
         reply += "Version: {}\n\n".format(details['langVersion']) 
     return reply
 
-def parse_new(comment):
+def parse_comment(body):
+    c_pattern = (r'/u/CompileBot(?P<args>.*)\n\s*'
+                 r'(?<=\n {4})(?P<src>.*(\n( {4}.*\n)*( {4}.*))?)'
+                 r'(\n\s*((?i)Input|Stdin):?\n\s*'
+                 r'(?<=\n {4})(?P<in>.*(\n( {4}.*\n)*( {4}.*\n?))?))?')
+    m = re.search(c_pattern, body)
+    args, src, stdin = m.group('args'), m.group('src'), m.group('in') or ''
+    return args, src, stdin
+    
+def create_reply(comment):
     """Search comments for username mentions followed by code blocks
     and return a formatted reply containing the output of the executed
     block.
     """  
     reply, pm = '', ''
-    c_pattern = (r'/u/CompileBot(?P<args>.*)\n\s*'
-                 r'(?<=\n {4})(?P<source>.*(\n( {4}.*\n)*( {4}.*))?)'
-                 r'(\n\s*((?i)Input|Stdin):?\n\s*'
-                 r'(?<=\n {4})(?P<input>.*(\n( {4}.*\n)*( {4}.*\n?))?))?')
-    m = re.search(c_pattern, comment.body)
     try:
-        args = m.group('args')
-        src = m.group('source')
-        stdin = m.group('input') or '' 
+        args, src, stdin = parse_comment(comment.body)
     except AttributeError:
         pm = "There was an error processing your comment."
         # TODO send author a PM 
@@ -139,7 +141,7 @@ def process_inbox(r):
     inbox = r.get_unread()
     for new in inbox:
         try:
-            reply, pm = parse_new(new)
+            reply, pm = create_reply(new)
             if reply: 
                 reply_to(new, reply) 
             if pm:
