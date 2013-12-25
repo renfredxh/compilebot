@@ -20,7 +20,7 @@ def compile(source, lang, stdin=''):
     the output details""" 
     # Login to ideone and create a submission
     i = ideone.Ideone(USERNAME, PASSWORD)
-    sub = i.create_submission(source, language_name=lang)
+    sub = i.create_submission(source, language_name=lang, std_input=stdin)
     sub_link = sub['link']
     details = i.submission_details(sub_link)
     # The status of the submission indicates whether or not the source has
