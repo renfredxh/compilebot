@@ -96,8 +96,6 @@ def reply_to(comment, text):
         text = text[:9995] + '...'
     try:
         comment.reply(text)
-        with open('bot.log', 'a') as f:
-            f.write(comment.id + '\n')
         log("Replied to {}".format(comment.id))
     except praw.errors.RateLimitExceeded as e:
         log('Rate Limit exceeded. '
@@ -107,8 +105,6 @@ def reply_to(comment, text):
         reply_to(comment, text)
     # Handle and log miscellaneous API exceptions
     except praw.errors.APIException as e:
-        with open('bot.log', 'a') as f:
-            f.write(comment.id + '\n')
         log("Exception on comment {}, {}".format(comment.id, e))
 
 def process_inbox(r):
