@@ -86,8 +86,8 @@ def process_inbox(r):
             log("Error processing comment {}\n{}".format(new.id, 
                     traceback.format_exc()), alert=True)
         finally:
-            #new.mark_as_read()  
-            pass # DEBUG
+            # TODO Mark as read before execution
+            new.mark_as_read()  
 
 # Fetch settings from json file
 try:
