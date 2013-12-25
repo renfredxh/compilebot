@@ -15,7 +15,7 @@ def log(message, alert=False):
         # TODO Send message to owner
         pass
     
-def compile(source, lang):
+def compile(source, lang, stdin=''):
     """Execute source using the ideone API and return a dict containing
     the output details""" 
     # Login to ideone and create a submission
@@ -78,10 +78,8 @@ def parse_new(comment):
         lang, opts = args, []
     lang = lang.strip()
     # Remove the leading four spaces from every line
-    src = src.replace('    ', '', 1)
     src = src.replace('\n    ', '\n')
-    details = compile(src, lang)
-    return format_reply(details)
+    stdin = stdin.replace('\n    ', '\n')
     try:
         details = compile(src, lang, stdin=stdin)
     except ideone.IdeoneError as e:
