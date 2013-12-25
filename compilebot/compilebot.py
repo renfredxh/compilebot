@@ -33,7 +33,7 @@ def compile(source, lang, stdin=''):
 
     """ 
     # Login to ideone and create a submission
-    i = ideone.Ideone(USERNAME, PASSWORD)
+    i = ideone.Ideone(I_USERNAME, I_PASSWORD)
     sub = i.create_submission(source, language_name=lang, std_input=stdin)
     sub_link = sub['link']
     details = i.submission_details(sub_link)
@@ -153,15 +153,17 @@ def process_inbox(r):
             # TODO Mark as read before execution
             new.mark_as_read()  
 
+# Settings
+SETTINGS_FILE = 'settings.json'
 # Fetch settings from json file
 try:
-    with open('settings.json', 'r') as f:
+    with open(SETTINGS_FILE, 'r') as f:
         SETTINGS = json.load(f)
 except (OSError, IOError) as e:
     print("Please configure settings.json")
-
-USERNAME = SETTINGS['ideone_user']
-PASSWORD = SETTINGS['ideone_pass']
+# Login credentials
+I_USERNAME = SETTINGS['ideone_user']
+I_PASSWORD = SETTINGS['ideone_pass']
 R_USERNAME = SETTINGS['reddit_user']
 R_PASSWORD = SETTINGS['reddit_pass']
 
