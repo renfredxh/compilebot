@@ -73,6 +73,20 @@ def format_reply(details, opts):
     return reply
 
 def parse_comment(body):
+    """Parse a string that contains a username mention and code block
+    and return the supplied arguments, source code and input.
+    
+    c_pattern is a regular expression that searches for the following:
+        1. "/u/" + the reddit username that is using the program 
+            (case insensitive).
+        2. A string representing the programming language and arguments 
+            + a "\n".
+        3. A markdown code block (one or more lines indented by 4 spaces)
+            that represents the source code + a "\n".
+        4. (Optional) "Input:" OR "Stdin:" + "\n".
+        5. (Optional) A markdown code block that represents the
+            program's input.
+    """
     c_pattern = (
         r'/u/(?i)%s(?P<args>.*)\n\s*'
         r'(?<=\n {4})(?P<src>.*(\n( {4}.*\n)*( {4}.*))?)'
