@@ -57,9 +57,8 @@ def format_reply(details, opts):
             ('\n' + details['input']).replace('\n', '\n    '))
     # Combine program output and runtime error output
     output = details['output'] + details['stderr']
-    if output:
-        reply += 'Output:\n\n{}\n'.format(
-            ('\n' + output).replace('\n', '\n    '))
+    reply += 'Output:\n\n{}\n'.format(
+        ('\n' + output).replace('\n', '\n    '))
     if details['cmpinfo']:
         reply += 'Compiler Message:\n\n{}\n\n'.format(
             details['cmpinfo'].replace('\n', '\n    '))
