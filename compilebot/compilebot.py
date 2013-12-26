@@ -160,9 +160,13 @@ def reply_to(comment, text):
         log("Exception on comment {id}, {error}".format(
             id=comment.id, error=e))
 
-def send_msg(sender, comment, text, subject="Comment {}".format(comment.id)):
+def send_msg(sender, comment, text, subject=''):
     """Reply to a reddit comment via private message."""
     recipient = comment.author
+    # If no custom subject line is given, the default will be a label 
+    # that identifies the comment.
+    if not subject:
+        subject = "Comment {}".format(comment.id)
     # Prepend message subject with username
     subject = "{} - {}".format(R_USERNAME, subject)
     sender.send_message(recipient, subject, text)
