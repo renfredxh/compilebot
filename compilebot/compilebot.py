@@ -110,7 +110,7 @@ def create_reply(comment):
     """  
     reply, pm = '', ''
     # Message a user the help text if "--help" is the first argument
-    if re.match(r'(?i)\+/u/{}\s*--help'.format(R_USERNAME), comment.body):
+    if re.search(r'(?i)\+/u/{}\s*--help'.format(R_USERNAME), comment.body):
         return None, HELP_TEXT
     try:
         args, src, stdin = parse_comment(comment.body)
@@ -165,7 +165,9 @@ def process_inbox(r):
     inbox = r.get_unread()
     for new in inbox:
         try:
-            if re.match(r'(?i)\+/u/{}'.format(R_USERNAME), new.body):
+            # Search for a user mention preceded by a '+' which is the signal
+            # for CompbileBot to create a reply for that comment
+            if re.search(r'(?i)\+/u/{}'.format(R_USERNAME), new.body):
                 reply, pm = create_reply(new)
                 if reply: 
                     reply_to(new, reply) 
