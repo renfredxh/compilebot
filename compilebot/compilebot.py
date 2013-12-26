@@ -103,6 +103,9 @@ def create_reply(comment):
     block or a message with additional information.
     """  
     reply, pm = '', ''
+    # Message a user the help text if "--help" is the first argument
+    if re.match(r'(?i)\+/u/{}\s*--help'.format(R_USERNAME), comment.body):
+        return None, HELP_TEXT
     try:
         args, src, stdin = parse_comment(comment.body)
     except AttributeError:
@@ -185,6 +188,7 @@ R_USERNAME = SETTINGS['reddit_user']
 R_PASSWORD = SETTINGS['reddit_pass']
 USER_AGENT = SETTINGS['user_agent']
 ADMIN = SETTINGS['admin_user']
+HELP_TEXT = SETTINGS['help_text']
 
 def main():
     r = praw.Reddit(USER_AGENT)
