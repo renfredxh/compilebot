@@ -77,7 +77,7 @@ def parse_comment(body):
     and return the supplied arguments, source code and input.
     
     c_pattern is a regular expression that searches for the following:
-        1. "/u/" + the reddit username that is using the program 
+        1. "+/u/" + the reddit username that is using the program 
             (case insensitive).
         2. A string representing the programming language and arguments 
             + a "\n".
@@ -88,7 +88,7 @@ def parse_comment(body):
             program's input.
     """
     c_pattern = (
-        r'/u/(?i)%s(?P<args>.*)\n\s*'
+        r'\+/u/(?i)%s(?P<args>.*)\n\s*'
         r'(?<=\n {4})(?P<src>.*(\n( {4}.*\n)*( {4}.*))?)'
         r'(\n\s*((?i)Input|Stdin):?\n\s*'
         r'(?<=\n {4})(?P<in>.*(\n( {4}.*\n)*( {4}.*\n?))?))?'
@@ -156,12 +156,12 @@ def process_inbox(r):
     inbox = r.get_unread()
     for new in inbox:
         try:
-            reply, pm = create_reply(new)
-            if reply: 
-                reply_to(new, reply) 
-            if pm:
-                # TODO send direct PM
-                reply_to(new, pm)
+            if re.match(r'(?i)\+/u/{}'.format(R_USERNAME), new.body):
+                reply, pm = create_reply(new)
+                if reply: 
+                    reply_to(new, reply) 
+                if pm:
+                    reply_msg(r, new, pm)
         except:
             # Notify of any errors
             log("Error processing comment {}\n{}".format(new.id, 
