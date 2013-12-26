@@ -116,7 +116,7 @@ def create_reply(comment):
     try:
         args, src, stdin = parse_comment(comment.body)
     except AttributeError:
-        pm = "There was an error processing your comment."
+        pm = ERROR_TEXT
         # TODO send author a PM 
         log("Formatting error on comment {}".format(comment.id))
         return None, pm
@@ -205,6 +205,7 @@ R_PASSWORD = SETTINGS['reddit_pass']
 USER_AGENT = SETTINGS['user_agent']
 ADMIN = SETTINGS['admin_user']
 HELP_TEXT = SETTINGS['help_text']
+ERROR_TEXT = SETTINGS['error_text']
 
 def main():
     r = praw.Reddit(USER_AGENT)
