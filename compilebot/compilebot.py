@@ -171,7 +171,7 @@ def process_inbox(r):
     for new in inbox:
         try:
             # Search for a user mention preceded by a '+' which is the signal
-            # for CompbileBot to create a reply for that comment
+            # for CompileBot to create a reply for that comment
             if re.search(r'(?i)\+/u/{}'.format(R_USERNAME), new.body):
                 reply, pm = create_reply(new)
                 if reply: 
