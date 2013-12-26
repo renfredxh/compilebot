@@ -12,7 +12,7 @@ def log(message, alert=False):
     """
     t = time.strftime('%y-%m-%d %H:%M:%S', time.localtime())
     message = "{}: {}\n".format(t, message)
-    print(message)
+    print(message, end='')
     if LOG_FILE:
         with open(LOG_FILE, 'a') as f:
             f.write(message)
