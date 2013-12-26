@@ -110,9 +110,6 @@ def create_reply(comment):
     block or a message with additional information.
     """  
     reply, pm = '', ''
-    # Message a user the help text if "--help" is the first argument
-    if re.search(r'(?i)\+/u/{}\s*--help'.format(R_USERNAME), comment.body):
-        return None, HELP_TEXT
     try:
         args, src, stdin = parse_comment(comment.body)
     except AttributeError:
@@ -180,6 +177,10 @@ def process_inbox(r):
                     reply_to(new, reply) 
                 if pm:
                     send_msg(r, new, pm)
+            elif (not new.was_comment) and re.match(r'(i?)\s*--help', new.body):
+                # Message a user the help text if comment is a message
+                # containing "--help".
+                send_msg(r, new, HELP_TEXT)
         except:
             # Notify admin of any errors
             log("Error processing comment {}\n{}".format(new.id, 
