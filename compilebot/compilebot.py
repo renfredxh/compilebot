@@ -100,7 +100,7 @@ def parse_comment(body):
 def create_reply(comment):
     """Search comments for username mentions followed by code blocks
     and return a formatted reply containing the output of the executed
-    block.
+    block or a message with additional information.
     """  
     reply, pm = '', ''
     try:
