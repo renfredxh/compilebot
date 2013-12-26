@@ -10,7 +10,7 @@ def log(message, alert=False):
     """Log messages along with a timestamp in a log file. If the alert
     option is set to true, send a message to the admin's reddit inbox.
     """
-    t = time.strftime('%m-%d %H:%M:%S', time.localtime())
+    t = time.strftime('%y-%m-%d %H:%M:%S', time.localtime())
     message = "{}: {}\n".format(t, message)
     print(message)
     if LOG_FILE:
