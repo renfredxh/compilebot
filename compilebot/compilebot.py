@@ -48,6 +48,7 @@ def compile(source, lang, stdin=''):
     while details['status'] != 0:
         details = i.submission_details(sub_link)
         time.sleep(3)
+    details['link'] = sub_link
     return details
 
 def format_reply(details, opts):
