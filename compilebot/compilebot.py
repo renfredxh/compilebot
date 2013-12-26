@@ -14,9 +14,13 @@ def log(message, alert=False):
     message = "{}: {}\n".format(t, message)
     with open('compilebot.log', 'a') as f:
         f.write(message)
-    if alert:
-        # TODO Send message to owner
-        pass
+    if alert and ADMIN:
+        r = praw.Reddit(USER_AGENT)
+        r.login(R_USERNAME, R_PASSWORD)
+        # Indent text as markdown block for readability
+        admin_alert = ('\n' + message).replace('\n', '\n    ')
+        subject = "CompileBot Alert"
+        r.send_message(ADMIN, subject, admin_alert)
     
 def compile(source, lang, stdin=''):
     """Compile and evaluate source sode using the ideone API and return
@@ -166,7 +170,7 @@ def process_inbox(r):
                 if pm:
                     reply_msg(r, new, pm)
         except:
-            # Notify of any errors
+            # Notify admin of any errors
             log("Error processing comment {}\n{}".format(new.id, 
                     traceback.format_exc()), alert=True)
         finally:
