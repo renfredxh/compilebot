@@ -205,7 +205,7 @@ def process_inbox(r):
             new.mark_as_read()  
 
 # Settings
-LOG_FILE = 'compilebot.log'
+LOG_FILE = '../compilebot.log'
 SETTINGS_FILE = 'settings.json'
 # Fetch settings from json file
 try:
