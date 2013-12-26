@@ -115,7 +115,8 @@ def create_reply(comment):
     except AttributeError:
         pm = ERROR_TEXT
         # TODO send author a PM 
-        log("Formatting error on comment {}".format(comment.id))
+        log("Formatting error on comment {c.id}:\n{c.body}".format(
+            c=comment), alert=True)
         return None, pm
     # Seperate the language name from the rest of the supplied options
     # TODO seperate args and lang in a more robust way
@@ -130,10 +131,12 @@ def create_reply(comment):
     stdin = stdin.replace('\n    ', '\n')
     try:
         details = compile(src, lang, stdin=stdin)
+        log("Compiled ideone submission {link} for {id}".format(
+            link=details['link'], id=comment.id))
     except ideone.IdeoneError as e:
         msg = str(e)
         # TODO Add link to accepted languages to msg
-        log("Language error on comment {}".format(comment.id))
+        log("Language error on comment {id}".format(id=comment.id))
         return None, msg
     reply = format_reply(details, opts)
     return reply, pm
@@ -145,16 +148,17 @@ def reply_to(comment, text):
         text = text[:9995] + '...'
     try:
         comment.reply(text)
-        log("Replied to {}".format(comment.id))
+        log("Replied to {id}".format(id=comment.id))
     except praw.errors.RateLimitExceeded as e:
         log('Rate Limit exceeded. '
-              'Sleeping for {} seconds'.format(e.sleep_time))
+              'Sleeping for {time} seconds'.format(time=e.sleep_time))
         # Wait and try again.
         time.sleep(e.sleep_time)
         reply_to(comment, text)
     # Handle and log miscellaneous API exceptions
     except praw.errors.APIException as e:
-        log("Exception on comment {}, {}".format(comment.id, e))
+        log("Exception on comment {id}, {error}".format(
+            id=comment.id, error=e))
 
 def send_msg(sender, comment, text, subject="Comment {}".format(comment.id)):
     """Reply to a reddit comment via private message."""
@@ -162,6 +166,8 @@ def send_msg(sender, comment, text, subject="Comment {}".format(comment.id)):
     # Prepend message subject with username
     subject = "{} - {}".format(R_USERNAME, subject)
     sender.send_message(recipient, subject, text)
+    log("Message reply for comment {id} sent to {to}".format(
+        id=comment.id, to=recipient))
     
 def process_inbox(r):
     """Iterate through each unread message/comment in the inbox, parse it
@@ -170,6 +176,9 @@ def process_inbox(r):
     inbox = r.get_unread()
     for new in inbox:
         try:
+            log("New {type} {id} from {sender}".format(
+                type="mention" if new.was_comment else "message",
+                id=new.id, sender=new.author))
             # Search for a user mention preceded by a '+' which is the signal
             # for CompileBot to create a reply for that comment
             if re.search(r'(?i)\+/u/{}'.format(R_USERNAME), new.body):
@@ -183,9 +192,10 @@ def process_inbox(r):
                 # containing "--help".
                 send_msg(r, new, HELP_TEXT, subject='Help')
         except:
+            tb = traceback.format_exc()
             # Notify admin of any errors
-            log("Error processing comment {}\n{}".format(new.id, 
-                    traceback.format_exc()), alert=True)
+            log("Error processing comment {id}\n{traceback}".format(
+                id=new.id, traceback=tb), alert=True)
         finally:
             # TODO Mark as read before execution
             new.mark_as_read()  
