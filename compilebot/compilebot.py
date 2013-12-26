@@ -10,9 +10,11 @@ def log(message, alert=False):
     """Log messages along with a timestamp in a log file. If the alert
     option is set to true, send a message to the admin's reddit inbox.
     """
+    if not LOG_FILE:
+        return
     t = time.strftime('%m-%d %H:%M:%S', time.localtime())
     message = "{}: {}\n".format(t, message)
-    with open('compilebot.log', 'a') as f:
+    with open(LOG_FILE, 'a') as f:
         f.write(message)
     if alert and ADMIN:
         r = praw.Reddit(USER_AGENT)
@@ -178,6 +180,7 @@ def process_inbox(r):
             new.mark_as_read()  
 
 # Settings
+LOG_FILE = 'compilebot.log'
 SETTINGS_FILE = 'settings.json'
 # Fetch settings from json file
 try:
