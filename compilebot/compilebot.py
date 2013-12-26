@@ -156,10 +156,11 @@ def reply_to(comment, text):
     except praw.errors.APIException as e:
         log("Exception on comment {}, {}".format(comment.id, e))
 
-def send_msg(sender, comment, text):
+def send_msg(sender, comment, text, subject="Comment {}".format(comment.id)):
     """Reply to a reddit comment via private message."""
     recipient = comment.author
-    subject = "CompileBot - Comment {}".format(comment.id)
+    # Prepend message subject with username
+    subject = "{} - {}".format(R_USERNAME, subject)
     sender.send_message(recipient, subject, text)
     
 def process_inbox(r):
@@ -180,7 +181,7 @@ def process_inbox(r):
             elif (not new.was_comment) and re.match(r'(i?)\s*--help', new.body):
                 # Message a user the help text if comment is a message
                 # containing "--help".
-                send_msg(r, new, HELP_TEXT)
+                send_msg(r, new, HELP_TEXT, subject='Help')
         except:
             # Notify admin of any errors
             log("Error processing comment {}\n{}".format(new.id, 
