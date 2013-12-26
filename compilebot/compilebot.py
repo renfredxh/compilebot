@@ -158,6 +158,12 @@ def reply_to(comment, text):
     except praw.errors.APIException as e:
         log("Exception on comment {}, {}".format(comment.id, e))
 
+def send_msg(sender, comment, text):
+    """Reply to a reddit comment via private message."""
+    recipient = comment.author
+    subject = "CompileBot - Comment {}".format(comment.id)
+    sender.send_message(recipient, subject, text)
+    
 def process_inbox(r):
     """Iterate through each unread message/comment in the inbox, parse it
     and reply to it appropriately.
@@ -172,7 +178,7 @@ def process_inbox(r):
                 if reply: 
                     reply_to(new, reply) 
                 if pm:
-                    reply_msg(r, new, pm)
+                    send_msg(r, new, pm)
         except:
             # Notify admin of any errors
             log("Error processing comment {}\n{}".format(new.id, 
