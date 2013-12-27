@@ -182,14 +182,14 @@ def process_inbox(r):
     inbox = r.get_unread()
     for new in inbox:
         sender = new.author
+        log("New {type} {id} from {sender}".format(
+            type="mention" if new.was_comment else "message",
+            id=new.id, sender=sender))
         if sender.name.lower() in BANNED_USERS:
             log("Ignoring banned user {user}".format(user=sender))
             new.mark_as_read()
             continue
         try:
-            log("New {type} {id} from {sender}".format(
-                type="mention" if new.was_comment else "message",
-                id=new.id, sender=new.author))
             # Search for a user mention preceded by a '+' which is the signal
             # for CompileBot to create a reply for that comment
             if re.search(r'(?i)\+/u/{}'.format(R_USERNAME), new.body):
