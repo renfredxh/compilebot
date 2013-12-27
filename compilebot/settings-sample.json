@@ -7,4 +7,5 @@
   "user_agent": "Code compilation bot tester /u/<your reddit username>",
   "help_text": "Help text coming soon",
   "error_text": "There was an error processing your comment.",
+  "subreddit": "" // optional moderator subreddit
 }
