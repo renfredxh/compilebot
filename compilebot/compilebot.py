@@ -102,6 +102,9 @@ def parse_comment(body):
     ) % R_USERNAME
     m = re.search(c_pattern, body)
     args, src, stdin = m.group('args'), m.group('src'), m.group('in') or ''
+    # Remove the leading four spaces from every line
+    src = src.replace('\n    ', '\n')
+    stdin = stdin.replace('\n    ', '\n')
     return args, src, stdin
     
 def create_reply(comment):
@@ -126,9 +129,6 @@ def create_reply(comment):
     except ValueError:
         lang, opts = args, []
     lang = lang.strip()
-    # Remove the leading four spaces from every line
-    src = src.replace('\n    ', '\n')
-    stdin = stdin.replace('\n    ', '\n')
     try:
         details = compile(src, lang, stdin=stdin)
         log("Compiled ideone submission {link} for {id}".format(
