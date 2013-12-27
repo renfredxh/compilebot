@@ -205,8 +205,8 @@ def process_inbox(r):
         except:
             tb = traceback.format_exc()
             # Notify admin of any errors
-            log("Error processing comment {id}\n{traceback}".format(
-                id=new.id, traceback=tb), alert=True)
+            log("Error processing comment {c.id}\n"
+                "{traceback}".format(c=new, traceback=tb), alert=True)
         finally:
             # TODO Mark as read before execution
             new.mark_as_read()  
