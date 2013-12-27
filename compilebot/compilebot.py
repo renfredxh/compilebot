@@ -198,7 +198,8 @@ def process_inbox(r):
                     reply_to(new, reply) 
                 if pm:
                     send_msg(r, new, pm)
-            elif (not new.was_comment) and re.match(r'(i?)\s*--help', new.body):
+            elif ((not new.was_comment) and 
+                  re.match(r'(i?)\s*--help', new.body)):
                 # Message a user the help text if comment is a message
                 # containing "--help".
                 send_msg(r, new, HELP_TEXT, subject='Help')
