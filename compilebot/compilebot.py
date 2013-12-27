@@ -211,6 +211,11 @@ def process_inbox(r):
             # TODO Mark as read before execution
             new.mark_as_read()  
 
+def main():
+    r = praw.Reddit(USER_AGENT)
+    r.login(R_USERNAME, R_PASSWORD)
+    process_inbox(r)
+    
 # Settings
 LOG_FILE = '../compilebot.log'
 SETTINGS_FILE = 'settings.json'
