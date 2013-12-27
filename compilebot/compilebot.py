@@ -116,9 +116,11 @@ def create_reply(comment):
     try:
         args, src, stdin = parse_comment(comment.body)
     except AttributeError:
-        pm = ERROR_TEXT
+        label = ("There was an error processing your comment: "
+                 "{link}\n\n".format(link=comment.permalink))
+        pm = label + ERROR_TEXT
         # TODO send author a PM 
-        log("Formatting error on comment {c.id}:\n{c.body}".format(
+        log("Formatting error on comment {c.id}: {c.body}".format(
             c=comment), alert=True)
         return None, pm
     # Seperate the language name from the rest of the supplied options
@@ -179,6 +181,11 @@ def process_inbox(r):
     """
     inbox = r.get_unread()
     for new in inbox:
+        sender = new.author
+        if sender.name.lower() in BANNED_USERS:
+            log("Ignoring banned user {user}".format(user=sender))
+            new.mark_as_read()
+            continue
         try:
             log("New {type} {id} from {sender}".format(
                 type="mention" if new.was_comment else "message",
@@ -219,14 +226,20 @@ I_PASSWORD = SETTINGS['ideone_pass']
 R_USERNAME = SETTINGS['reddit_user']
 R_PASSWORD = SETTINGS['reddit_pass']
 USER_AGENT = SETTINGS['user_agent']
-ADMIN = SETTINGS['admin_user']
+ADMIN = None#SETTINGS['admin_user']
+SUBREDDIT = SETTINGS['subreddit']
+if SUBREDDIT:
+    # Banned users are taken from the moderator subreddit 
+    # banned users list
+    r = praw.Reddit(USER_AGENT)
+    r.login(R_USERNAME, R_PASSWORD)
+    BANNED_USERS = {user.name.lower() for user in 
+                    r.get_subreddit(SUBREDDIT).get_banned()}
+    del r
+else:
+    BANNED_USERS = set()
 HELP_TEXT = SETTINGS['help_text']
 ERROR_TEXT = SETTINGS['error_text']
 
-def main():
-    r = praw.Reddit(USER_AGENT)
-    r.login(R_USERNAME, R_PASSWORD)
-    process_inbox(r)
-    
 if __name__ == '__main__':
     main()
