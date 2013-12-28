@@ -6,6 +6,78 @@ import re
 import json
 import traceback
 
+class Reply(object):
+    
+    """An object that represents a potential response to a comment.
+    
+    Replies are not tied to a specific recipient on at their inception,
+    however once sent the recipient should be recorded.
+    """
+    
+    def __init__(self, text):
+        # Truncate text if it exceeds max character limit.
+        if len(text) >= 10000:
+            text = text[:9995] + '...'
+        self.text = text
+        self.recipient = None
+    
+    def send(self, *args, **kwargs):
+        """An abstract method that sends the reply."""
+        raise NotImplementedError
+            
+class CommentReply(Reply):
+
+    def __init__(self, text, compile_details):
+        Reply.__init__(self, text)
+        self.compile_details = compile_details
+        self.parent_comment = None
+        
+    def send(self, comment, r=None):
+        """Send a reply to a specific reddit comment."""
+        self.parent_comment = comment
+        self.recipient = comment.author
+        try:
+            comment.reply(self.text)
+            log("Replied to {id} {deet}".format(id=comment.id, deet=self.compile_details))
+        except praw.errors.RateLimitExceeded as e:
+            log('Rate Limit exceeded. '
+                  'Sleeping for {time} seconds'.format(time=e.sleep_time))
+            # Wait and try again.
+            time.sleep(e.sleep_time)
+            self.comment_reply(comment)
+        # Handle and log miscellaneous API exceptions
+        except praw.errors.APIException as e:
+            log("Exception on comment {id}, {error}".format(
+                id=comment.id, error=e))
+                
+    def make_edit(self, comment, parent):
+        """Edit one of the bot's existing comments."""
+        self.parent_comment = parent
+        self.recipient = parent.author
+        comment.edit(self.text)
+        log("Edited comment {}".format(comment.id))
+
+class MessageReply(Reply):
+
+    def __init__(self, text, subject=''):
+        Reply.__init__(self, text)
+        self.subject = subject
+
+    def send(self, comment, r):
+        """Reply the author of a reddit comment by sending them a reply
+        via private message.
+        """
+        self.recipient = comment.author
+        # If no custom subject line is given, the default will be a label
+        # that identifies the comment.
+        if not self.subject:
+            self.subject = "Comment {}".format(comment.id)
+        # Prepend message subject with username
+        self.subject = "{} - {}".format(R_USERNAME, subject)
+        sender.send_message(self.recipient, self.subject, self.text)
+        log("Message reply for comment {id} sent to {to}".format(
+            id=comment.id, to=recipient))
+
 def log(message, alert=False):
     """Log messages along with a timestamp in a log file. If the alert
     option is set to true, send a message to the admin's reddit inbox.
@@ -91,13 +163,13 @@ def format_reply(details, opts):
     # To ensure the reply is less than 10000 characters long, shorten
     # sections of the reply until they are of adequate length. Certain
     # sections with less priority will be shorted before others.
-    reply = ''
+    reply_text = ''
     for section in (body, head, extra):
-        if len(section) + len(reply) > 9800:
-            section = section[:9800 - len(reply)] + '\n...\n'
-        reply += section 
-    reply += footer
-    return reply
+        if len(section) + len(reply_text) > 9800:
+            section = section[:9800 - len(reply_text)] + '\n...\n'
+        reply_text += section 
+    reply_text += footer
+    return reply_text
 
 def parse_comment(body):
     """Parse a string that contains a username mention and code block
@@ -132,17 +204,16 @@ def create_reply(comment):
     and return a formatted reply containing the output of the executed
     block or a message with additional information.
     """  
-    reply, pm = '', ''
     try:
         args, src, stdin = parse_comment(comment.body)
     except AttributeError:
         label = ("There was an error processing your comment: "
                  "{link}\n\n".format(link=comment.permalink))
-        pm = label + ERROR_TEXT
+        reply = label + ERROR_TEXT
         # TODO send author a PM 
         log("Formatting error on comment {c.id}: {c.body}".format(
             c=comment), alert=True)
-        return None, pm
+        return MessageReply(reply)
     # Seperate the language name from the rest of the supplied options
     # TODO seperate args and lang in a more robust way
     try:
@@ -156,48 +227,12 @@ def create_reply(comment):
         log("Compiled ideone submission {link} for {id}".format(
             link=details['link'], id=comment.id))
     except ideone.IdeoneError as e:
-        msg = str(e)
+        error_reply = str(e)
         # TODO Add link to accepted languages to msg
         log("Language error on comment {id}".format(id=comment.id))
-        return None, msg
-    reply = format_reply(details, opts)
-    return reply, pm
-
-def reply_to(comment, text):
-    """Reply to a reddit comment using the supplied text"""
-    # Truncate message if it exceeds max character limit.
-    if len(text) >= 10000:
-        text = text[:9995] + '...'
-    try:
-        comment.reply(text)
-        log("Replied to {id}".format(id=comment.id))
-    except praw.errors.RateLimitExceeded as e:
-        log('Rate Limit exceeded. '
-              'Sleeping for {time} seconds'.format(time=e.sleep_time))
-        # Wait and try again.
-        time.sleep(e.sleep_time)
-        reply_to(comment, text)
-    # Handle and log miscellaneous API exceptions
-    except praw.errors.APIException as e:
-        log("Exception on comment {id}, {error}".format(
-            id=comment.id, error=e))
-
-def edit_reply(comment, text):
-    comment.edit(text)
-    log("Edited comment {}".format(comment.id))
-
-def send_msg(sender, comment, text, subject=''):
-    """Reply to a reddit comment via private message."""
-    recipient = comment.author
-    # If no custom subject line is given, the default will be a label 
-    # that identifies the comment.
-    if not subject:
-        subject = "Comment {}".format(comment.id)
-    # Prepend message subject with username
-    subject = "{} - {}".format(R_USERNAME, subject)
-    sender.send_message(recipient, subject, text)
-    log("Message reply for comment {id} sent to {to}".format(
-        id=comment.id, to=recipient))
+        return MessageReply(error_reply)
+    text = format_reply(details, opts)
+    return CommentReply(text, details)
     
 def process_inbox(new, r):
     """Parse a new comment or message for various options and ignore reply 
@@ -213,16 +248,17 @@ def process_inbox(new, r):
     # Search for a user mention preceded by a '+' which is the signal
     # for CompileBot to create a reply for that comment
     if re.search(r'(?i)\+/u/{}'.format(R_USERNAME), new.body):
-        reply, pm = create_reply(new)
+        reply = create_reply(new)
         if reply: 
-            reply_to(new, reply) 
-        if pm:
-            send_msg(r, new, pm)
+            reply.send(new, r)
+            return
     elif ((not new.was_comment) and 
           re.match(r'(i?)\s*--help', new.body)):
         # Message a user the help text if comment is a message
         # containing "--help".
-        send_msg(r, new, HELP_TEXT, subject='Help')
+        reply = MessageReply(HELP_TEXT, subject='Help')
+        reply.send(new, r)
+        return
     elif ((not new.was_comment) and 
           re.match(r'(i?)\s*--recompile', new.body)):
         # Search for the recompile command followed by a comment id.
@@ -246,8 +282,8 @@ def process_inbox(new, r):
         # requesting the recompile to prevent one user sending a recompile
         # request on the behalf of another.
         if original.author == new.author:                  
-            reply, pm = create_reply(original)
-            if reply:
+            reply = create_reply(original)
+            if isinstance(reply, CommentReply):
                 # Search for an existing comment reply from the bot.
                 # If one is found, edit the existing comment instead
                 # of creating a new one. 
@@ -259,13 +295,13 @@ def process_inbox(new, r):
                     if rp.author.name.lower() == R_USERNAME.lower():
                         footnote = ("\n\n**EDIT:** Recompile request "
                                     "by {}".format(new.author))
-                        reply += footnote
-                        edit_reply(rp, reply)
+                        reply.text += footnote
+                        reply.make_edit(rp, original)
                         break
                 else:
-                    reply_to(original, reply)
-            if pm:
-                send_msg(r, new, pm)
+                    reply.send(original)
+            else:
+                reply.send(new, r)
         else:
             new.reply("Error recompiing. You can only request to "
                       "recompile your own comments.")
