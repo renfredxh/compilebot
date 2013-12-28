@@ -17,7 +17,7 @@ class Reply(object):
     def __init__(self, text):
         # Truncate text if it exceeds max character limit.
         if len(text) >= 10000:
-            text = text[:9995] + '...'
+            text = text[:9995] + '\n...'
         self.text = text
         self.recipient = None
     
