@@ -55,28 +55,48 @@ def format_reply(details, opts):
     """Returns a reply that contains the output from a ideone submission's 
     details along with optional additional information.
     """
-    reply = ''
+    head, body, extra, footer = '', '', '', ''
+    # Combine information that will go before the output
     if '--source' in opts:
-        reply += 'Source:\n\n{}\n'.format(
+        head += 'Source:\n\n{}\n'.format(
             ('\n' + details['source']).replace('\n', '\n    '))
     if '--input' in opts:
-        reply += 'Input:\n\n{}\n'.format(
+        head += 'Input:\n\n{}\n'.format(
             ('\n' + details['input']).replace('\n', '\n    '))
     # Combine program output and runtime error output
     output = details['output'] + details['stderr']
-    reply += 'Output:\n\n{}\n'.format(
+    # Truncate the output if it contains an excessive 
+    # amount of line breaks or if it is too long.
+    if output.count('\n') > 100:
+        lines = output.split('\n')
+        output = '\n'.join(lines[:101])
+        output += "\n..."
+    # Truncate the output if it is too long.
+    if len(output) > 8000:
+        output = output[:8000] + '\n    ...\n'
+    body += 'Output:\n\n{}\n'.format(
         ('\n' + output).replace('\n', '\n    '))
     if details['cmpinfo']:
-        reply += 'Compiler Message:\n\n{}\n\n'.format(
+        body += 'Compiler Message:\n\n{}\n\n'.format(
             details['cmpinfo'].replace('\n', '\n    '))
+    # Combine extra runtime information
     if '--date' in opts:
-        reply += "Date: {}\n\n".format(details['date'])
+        extra += "Date: {}\n\n".format(details['date'])
     if '--memory' in opts:
-        reply += "Memory Usage: {}\n\n".format(details['memory'])
+        extra += "Memory Usage: {}\n\n".format(details['memory'])
     if '--time' in opts:
-        reply += "Execution Time: {} seconds\n\n".format(details['time'])
+        extra += "Execution Time: {} seconds\n\n".format(details['time'])
     if '--version' in opts:
-        reply += "Version: {}\n\n".format(details['langVersion']) 
+        extra += "Version: {}\n\n".format(details['langVersion'])
+    # To ensure the reply is less than 10000 characters long, shorten
+    # sections of the reply until they are of adequate length. Certain
+    # sections with less priority will be shorted before others.
+    reply = ''
+    for section in (body, head, extra):
+        if len(section) + len(reply) > 9800:
+            section = section[:9800 - len(reply)] + '\n...\n'
+        reply += section 
+    reply += footer
     return reply
 
 def parse_comment(body):
