@@ -324,7 +324,31 @@ def main():
                 "{traceback}".format(c=new, traceback=tb), alert=True)
         finally:
             new.mark_as_read()
+
+def detect_spam(reply):
+    """Scan a reply and send out mod mail if potentially spammy 
+    behavior is detected.
+     """
+    LINE_LIMIT = 50
+    CHAR_LIMIT = 2000
+    SPAM = ["rm","-rf"]
+    raw_output = reply.compile_details['output']
+    source = reply.compile_details['source']
+    errors = reply.compile_details['stderr']
     
+    spam_behaviors = {
+        "Excessive line breaks": raw_output.count('\n') > LINE_LIMIT,
+        "Excessive character count": len(raw_output) > CHAR_LIMIT,
+        "Spam phrase detected": any([word in source for word in SPAM]),
+        "Illegal system call detected": "Permission denied" in errors
+    }
+    if any(spam_behaviors.values()):
+        spam_triggers = [k for k, v in spam_behaviors.iteritems() if v]
+        text = ("Potential spam detected on comment "
+                "{c.permalink} by {c.author}: ".format(c=reply.parent))
+        text += ', '.join(spam_triggers)
+        log(text, alert=True)
+            
 # Settings
 LOG_FILE = '../compilebot.log'
 SETTINGS_FILE = 'settings.json'
