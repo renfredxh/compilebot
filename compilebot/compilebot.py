@@ -179,95 +179,95 @@ def send_msg(sender, comment, text, subject=''):
     log("Message reply for comment {id} sent to {to}".format(
         id=comment.id, to=recipient))
     
-def process_inbox(r):
-    """Iterate through each unread message/comment in the inbox, parse it
-    and reply to it appropriately.
+def process_inbox(new, r):
+    """Parse a new comment or message for various options and ignore reply 
+    to as appropriate.
     """
+    sender = new.author
+    log("New {type} {id} from {sender}".format(
+        type="mention" if new.was_comment else "message",
+        id=new.id, sender=sender))
+    if sender.name.lower() in BANNED_USERS:
+        log("Ignoring banned user {user}".format(user=sender))
+        return
+    # Search for a user mention preceded by a '+' which is the signal
+    # for CompileBot to create a reply for that comment
+    if re.search(r'(?i)\+/u/{}'.format(R_USERNAME), new.body):
+        reply, pm = create_reply(new)
+        if reply: 
+            reply_to(new, reply) 
+        if pm:
+            send_msg(r, new, pm)
+    elif ((not new.was_comment) and 
+          re.match(r'(i?)\s*--help', new.body)):
+        # Message a user the help text if comment is a message
+        # containing "--help".
+        send_msg(r, new, HELP_TEXT, subject='Help')
+    elif ((not new.was_comment) and 
+          re.match(r'(i?)\s*--recompile', new.body)):
+        # Search for the recompile command followed by a comment id.
+        # Example: 1tt4jt/post_title/ceb7czt
+        # The comment id can optionally be prefixed by a url.
+        # Example: reddit.com/r/sub/comments/1tt4jt/post_title/ceb7czt
+        p = (r'(i?)--recompile\s*(?P<url>[^\s*]+)?'
+             r'(?P<id>\b\w+/\w+/\w+\b)')
+        m = re.search(p, new.body)
+        try:
+            id = m.group('id')
+        except AttributeError:
+            new.reply("Error recompiling")
+            return
+        # Fetch the comment that will be recompiled.
+        sub = r.get_submission(submission_id=id, comment_sort='best')
+        original = sub.comments[0]
+        log("Processing request to recompile {id} from {user}"
+            "".format(id=original.id, user=new.author))
+        # Ensure the author of the original comment matches the author
+        # requesting the recompile to prevent one user sending a recompile
+        # request on the behalf of another.
+        if original.author == new.author:                  
+            reply, pm = create_reply(original)
+            if reply:
+                # Search for an existing comment reply from the bot.
+                # If one is found, edit the existing comment instead
+                # of creating a new one. 
+                #
+                # Note: the .replies property only returns a limited
+                # number of comments. If the reply is buried, it will
+                # not be retrieved and a new one will be created
+                for rp in original.replies:
+                    if rp.author.name.lower() == R_USERNAME.lower():
+                        footnote = ("\n\n**EDIT:** Recompile request "
+                                    "by {}".format(new.author))
+                        reply += footnote
+                        edit_reply(rp, reply)
+                        break
+                else:
+                    reply_to(original, reply)
+            if pm:
+                send_msg(r, new, pm)
+        else:
+            new.reply("Error recompiing. You can only request to "
+                      "recompile your own comments.")
+            log("Attempt to reompile on behalf of another author "
+                "detected. Request deined.")
+
+def main():
+    r = praw.Reddit(USER_AGENT)
+    r.login(R_USERNAME, R_PASSWORD)
+    # Iterate though each new comment/message in the inbox and
+    # process it appropriately
     inbox = r.get_unread()
     for new in inbox:
-        sender = new.author
-        log("New {type} {id} from {sender}".format(
-            type="mention" if new.was_comment else "message",
-            id=new.id, sender=sender))
-        if sender.name.lower() in BANNED_USERS:
-            log("Ignoring banned user {user}".format(user=sender))
-            new.mark_as_read()
-            continue
         try:
-            # Search for a user mention preceded by a '+' which is the signal
-            # for CompileBot to create a reply for that comment
-            if re.search(r'(?i)\+/u/{}'.format(R_USERNAME), new.body):
-                reply, pm = create_reply(new)
-                if reply: 
-                    reply_to(new, reply) 
-                if pm:
-                    send_msg(r, new, pm)
-            elif ((not new.was_comment) and 
-                  re.match(r'(i?)\s*--help', new.body)):
-                # Message a user the help text if comment is a message
-                # containing "--help".
-                send_msg(r, new, HELP_TEXT, subject='Help')
-            elif ((not new.was_comment) and 
-                  re.match(r'(i?)\s*--recompile', new.body)):
-                # Search for the recompile command followed by a comment id.
-                # Example: 1tt4jt/post_title/ceb7czt
-                # The comment id can optionally be prefixed by a url.
-                # Example: reddit.com/r/sub/comments/1tt4jt/post_title/ceb7czt
-                p = (r'(i?)--recompile\s*(?P<url>[^\s*]+)?'
-                     r'(?P<id>\b\w+/\w+/\w+\b)')
-                m = re.search(p, new.body)
-                try:
-                    id = m.group('id')
-                except AttributeError:
-                    new.reply("Error recompiling")
-                    continue
-                # Fetch the comment that will be recompiled.
-                sub = r.get_submission(submission_id=id, comment_sort='best')
-                original = sub.comments[0]
-                log("Processing request to recompile {id} from {user}"
-                    "".format(id=original.id, user=new.author))
-                # Ensure the author of the original comment matches the author
-                # requesting the recompile to prevent one user sending a recompile
-                # request on the behalf of another.
-                if original.author == new.author:                  
-                    reply, pm = create_reply(original)
-                    if reply:
-                        # Search for an existing comment reply from the bot.
-                        # If one is found, edit the existing comment instead
-                        # of creating a new one. 
-                        #
-                        # Note: the .replies property only returns a limited
-                        # number of comments. If the reply is buried, it will
-                        # not be retrieved and a new one will be created
-                        for rp in original.replies:
-                            if rp.author.name.lower() == R_USERNAME.lower():
-                                footnote = ("\n\n**EDIT:** Recompile request "
-                                            "by {}".format(new.author))
-                                reply += footnote
-                                edit_reply(rp, reply)
-                                break
-                        else:
-                            reply_to(original, reply)
-                    if pm:
-                        send_msg(r, new, pm)
-                else:
-                    new.reply("Error recompiing. You can only request to "
-                              "recompile your own comments.")
-                    log("Attempt to reompile on behalf of another author "
-                        "detected. Request deined.")
+            process_inbox(new, r)
         except:
             tb = traceback.format_exc()
             # Notify admin of any errors
             log("Error processing comment {c.id}\n"
                 "{traceback}".format(c=new, traceback=tb), alert=True)
         finally:
-            # TODO Mark as read before execution
-            new.mark_as_read()  
-
-def main():
-    r = praw.Reddit(USER_AGENT)
-    r.login(R_USERNAME, R_PASSWORD)
-    process_inbox(r)
+            new.mark_as_read()
     
 # Settings
 LOG_FILE = '../compilebot.log'
