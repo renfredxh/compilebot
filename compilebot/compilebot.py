@@ -41,7 +41,7 @@ class CommentReply(Reply):
             log("Replied to {id} {deet}".format(id=comment.id, deet=self.compile_details))
         except praw.errors.RateLimitExceeded as e:
             log('Rate Limit exceeded. '
-                  'Sleeping for {time} seconds'.format(time=e.sleep_time))
+                'Sleeping for {time} seconds'.format(time=e.sleep_time))
             # Wait and try again.
             time.sleep(e.sleep_time)
             self.send(comment)
