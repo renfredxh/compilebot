@@ -314,23 +314,6 @@ def process_inbox(new, r):
             log("Attempt to reompile on behalf of another author "
                 "detected. Request deined.")
 
-def main():
-    r = praw.Reddit(USER_AGENT)
-    r.login(R_USERNAME, R_PASSWORD)
-    # Iterate though each new comment/message in the inbox and
-    # process it appropriately
-    inbox = r.get_unread()
-    for new in inbox:
-        try:
-            process_inbox(new, r)
-        except:
-            tb = traceback.format_exc()
-            # Notify admin of any errors
-            log("Error processing comment {c.id}\n"
-                "{traceback}".format(c=new, traceback=tb), alert=True)
-        finally:
-            new.mark_as_read()
-
 def detect_spam(reply):
     """Scan a reply and send out mod mail if potentially spammy 
     behavior is detected.
@@ -354,6 +337,23 @@ def detect_spam(reply):
                 "{c.permalink} by {c.author}: ".format(c=reply.parent))
         text += ', '.join(spam_triggers)
         log(text, alert=True)
+        
+def main():
+    r = praw.Reddit(USER_AGENT)
+    r.login(R_USERNAME, R_PASSWORD)
+    # Iterate though each new comment/message in the inbox and
+    # process it appropriately
+    inbox = r.get_unread()
+    for new in inbox:
+        try:
+            process_inbox(new, r)
+        except:
+            tb = traceback.format_exc()
+            # Notify admin of any errors
+            log("Error processing comment {c.id}\n"
+                "{traceback}".format(c=new, traceback=tb), alert=True)
+        finally:
+            new.mark_as_read()
             
 # Settings
 LOG_FILE = '../compilebot.log'
