@@ -226,8 +226,14 @@ def create_reply(comment):
         details = compile(src, lang, stdin=stdin)
         log("Compiled ideone submission {link} for {id}".format(
             link=details['link'], id=comment.id))
-    except ideone.IdeoneError as e:
-        error_reply = str(e)
+    except ideone.LanguageNotFoundError as e:
+        label = ("There was an error processing your comment: "
+                 "{link}\n\n".format(link=comment.permalink))
+        error_reply = ("The language you requested (\"{lang}\"), was not "
+                       "found. Perhaps you meant one of the following: "
+                       "{choices}").format(lang=lang, 
+                                           choices=e.similar_languages)
+        error_reply = label + error_reply
         # TODO Add link to accepted languages to msg
         log("Language error on comment {id}".format(id=comment.id))
         return MessageReply(error_reply)
