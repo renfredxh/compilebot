@@ -44,7 +44,7 @@ class CommentReply(Reply):
                   'Sleeping for {time} seconds'.format(time=e.sleep_time))
             # Wait and try again.
             time.sleep(e.sleep_time)
-            self.comment_reply(comment)
+            self.send(comment)
         # Handle and log miscellaneous API exceptions
         except praw.errors.APIException as e:
             log("Exception on comment {id}, {error}".format(
