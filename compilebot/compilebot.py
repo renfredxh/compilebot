@@ -38,7 +38,7 @@ class CommentReply(Reply):
         self.recipient = comment.author
         try:
             comment.reply(self.text)
-            log("Replied to {id} {deet}".format(id=comment.id, deet=self.compile_details))
+            log("Replied to {id}".format(id=comment.id))
         except praw.errors.RateLimitExceeded as e:
             log('Rate Limit exceeded. '
                 'Sleeping for {time} seconds'.format(time=e.sleep_time))
@@ -93,10 +93,10 @@ class MessageReply(Reply):
         if not self.subject:
             self.subject = "Comment {}".format(comment.id)
         # Prepend message subject with username
-        self.subject = "{} - {}".format(R_USERNAME, subject)
-        sender.send_message(self.recipient, self.subject, self.text)
+        self.subject = "{} - {}".format(R_USERNAME, self.subject)
+        r.send_message(self.recipient, self.subject, self.text)
         log("Message reply for comment {id} sent to {to}".format(
-            id=comment.id, to=recipient))
+            id=comment.id, to=self.recipient))
 
 def log(message, alert=False):
     """Log messages along with a timestamp in a log file. If the alert
