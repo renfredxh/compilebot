@@ -103,6 +103,46 @@ class TestCreateReply(unittest.TestCase):
         
     def tearDown(self):
         reload(cb)
+        
+class TestDetectSpam(unittest.TestCase):
     
+    class Comment(object):
+        def __init__(self):
+            self.author = ''
+            self.permalink = ''
+    
+    def create_reply(self, spam):
+        details = {
+            'output': spam,
+            'source': '',
+            'stderr': ''
+        }
+        text = "Output:\n\n\n{}\n".format(spam)
+        reply = cb.CommentReply(text, details)
+        reply.parent_comment = self.Comment()
+        return reply
+        
+    def test_line_breaks(self):
+        spam = "    \n" * (cb.LINE_LIMIT + 1)
+        reply = self.create_reply(spam)
+        self.assertIn("Excessive line breaks", reply.detect_spam())
+        
+    def test_char_limit(self):
+        spam = "a" * (cb.CHAR_LIMIT + 1)
+        reply = self.create_reply(spam)
+        self.assertIn("Excessive character count", reply.detect_spam())
+    
+    @unittest.skipIf(len(cb.SPAM_PHRASES) < 1, "No spam phrases set")    
+    def test_spam_phrases(self):
+        spam = cb.SPAM_PHRASES[0]
+        reply = self.create_reply(spam)
+        self.assertIn("Spam phrase detected", reply.detect_spam())
+        
+    def test_permission_denied(self):
+        spam = ""
+        reply = self.create_reply(spam)
+        reply.compile_details['stderr'] = "'rm -rf /*': Permission denied"
+        self.assertIn("Illegal system call detected", reply.detect_spam())
+        
 if __name__ == '__main__':
     unittest.main()
