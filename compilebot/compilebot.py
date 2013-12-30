@@ -56,6 +56,26 @@ class CommentReply(Reply):
         self.recipient = parent.author
         comment.edit(self.text)
         log("Edited comment {}".format(comment.id))
+        
+    def detect_spam(self):
+        """Scan a reply and return a list of potentially spammy attributes
+        found in the comment's output.
+         """
+        output = self.compile_details['output']
+        source = self.compile_details['source']
+        errors = self.compile_details['stderr']
+    
+        spam_behaviors = {
+            "Excessive line breaks": output.count('\n') > LINE_LIMIT,
+            "Excessive character count": len(output) > CHAR_LIMIT,
+            "Spam phrase detected": any([word in (source + output).lower()
+                                         for word in SPAM_PHRASES]),
+            "Illegal system call detected": "Permission denied" in errors
+        }
+        if any(spam_behaviors.values()):
+            spam_triggers = [k for k, v in spam_behaviors.iteritems() if v]
+            return spam_triggers
+        return []
 
 class MessageReply(Reply):
 
@@ -313,30 +333,13 @@ def process_inbox(new, r):
                       "recompile your own comments.")
             log("Attempt to reompile on behalf of another author "
                 "detected. Request deined.")
-
-def detect_spam(reply):
-    """Scan a reply and send out mod mail if potentially spammy 
-    behavior is detected.
-     """
-    LINE_LIMIT = 50
-    CHAR_LIMIT = 2000
-    SPAM = ["rm","-rf"]
-    raw_output = reply.compile_details['output']
-    source = reply.compile_details['source']
-    errors = reply.compile_details['stderr']
-    
-    spam_behaviors = {
-        "Excessive line breaks": raw_output.count('\n') > LINE_LIMIT,
-        "Excessive character count": len(raw_output) > CHAR_LIMIT,
-        "Spam phrase detected": any([word in source for word in SPAM]),
-        "Illegal system call detected": "Permission denied" in errors
-    }
-    if any(spam_behaviors.values()):
-        spam_triggers = [k for k, v in spam_behaviors.iteritems() if v]
-        text = ("Potential spam detected on comment "
-                "{c.permalink} by {c.author}: ".format(c=reply.parent))
-        text += ', '.join(spam_triggers)
-        log(text, alert=True)
+    if isinstance(reply, CommentReply):
+        spam = reply.detect_spam()
+        if spam:
+            text = ("Potential spam detected on comment {c.permalink} "
+                    "by {c.author}: ".format(c=reply.parent_comment))
+            text += ', '.join(spam)
+            log(text, alert=True)
         
 def main():
     r = praw.Reddit(USER_AGENT)
