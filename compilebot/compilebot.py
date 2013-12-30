@@ -384,6 +384,10 @@ SUBREDDIT = SETTINGS['subreddit']
 BANNED_USERS = set()
 HELP_TEXT = SETTINGS['help_text']
 ERROR_TEXT = SETTINGS['error_text']
+# Spam Settings
+LINE_LIMIT = SETTINGS["spam"]["line_limit"]
+CHAR_LIMIT = SETTINGS["spam"]["char_limit"]
+SPAM_PHRASES = SETTINGS["spam"]["spam_phrases"]
 
 if __name__ == '__main__':
     main()
