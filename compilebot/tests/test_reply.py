@@ -12,7 +12,9 @@ Run from parent directory: python -m unittest tests.test_reply
 """
 
 cb.USER_AGENT = "compilebot unit tests run by {}".format(cb.R_USERNAME)
-cb.LOG_FILE = "tests.log"
+
+def log(text, *args, **kwargs):
+    print(text)
 
 def reddit_id(length=6):
     "Emulate a reddit id with a random string of letters and digits"
