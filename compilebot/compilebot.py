@@ -143,6 +143,13 @@ def compile(source, lang, stdin=''):
     details['link'] = sub_link
     return details
 
+def get_banned(r):
+    """Retrive list of banned users list from the moderator subreddit"""
+    # Banned users are taken from the moderator subreddit 
+    # banned users list
+    BANNED_USERS = {user.name.lower() for user in 
+                    r.get_subreddit(SUBREDDIT).get_banned()}
+
 def format_reply(details, opts):
     """Returns a reply that contains the output from a ideone submission's 
     details along with optional additional information.
@@ -344,6 +351,8 @@ def process_inbox(new, r):
 def main():
     r = praw.Reddit(USER_AGENT)
     r.login(R_USERNAME, R_PASSWORD)
+    if SUBREDDIT:
+        BANNED_USERS = get_banned(r)
     # Iterate though each new comment/message in the inbox and
     # process it appropriately
     inbox = r.get_unread()
@@ -375,16 +384,7 @@ R_PASSWORD = SETTINGS['reddit_pass']
 USER_AGENT = SETTINGS['user_agent']
 ADMIN = None#SETTINGS['admin_user']
 SUBREDDIT = SETTINGS['subreddit']
-if SUBREDDIT:
-    # Banned users are taken from the moderator subreddit 
-    # banned users list
-    r = praw.Reddit(USER_AGENT)
-    r.login(R_USERNAME, R_PASSWORD)
-    BANNED_USERS = {user.name.lower() for user in 
-                    r.get_subreddit(SUBREDDIT).get_banned()}
-    del r
-else:
-    BANNED_USERS = set()
+BANNED_USERS = set()
 HELP_TEXT = SETTINGS['help_text']
 ERROR_TEXT = SETTINGS['error_text']
 
