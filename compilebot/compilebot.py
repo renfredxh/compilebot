@@ -313,6 +313,8 @@ def process_inbox(new, r):
         # request on the behalf of another.
         if original.author == new.author:                  
             reply = create_reply(original)
+            # Ensure the recompiled reply resulted in a valid comment
+            # reply and not an error message reply.
             if isinstance(reply, CommentReply):
                 # Search for an existing comment reply from the bot.
                 # If one is found, edit the existing comment instead
