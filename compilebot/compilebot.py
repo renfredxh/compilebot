@@ -284,14 +284,12 @@ def process_inbox(new, r):
         reply = create_reply(new)
         if reply: 
             reply.send(new, r)
-            return
     elif ((not new.was_comment) and 
           re.match(r'(i?)\s*--help', new.body)):
         # Message a user the help text if comment is a message
         # containing "--help".
         reply = MessageReply(HELP_TEXT, subject='Help')
         reply.send(new, r)
-        return
     elif ((not new.was_comment) and 
           re.match(r'(i?)\s*--recompile', new.body)):
         # Search for the recompile command followed by a comment id.
@@ -305,7 +303,6 @@ def process_inbox(new, r):
             id = m.group('id')
         except AttributeError:
             new.reply("Error recompiling")
-            return
         # Fetch the comment that will be recompiled.
         sub = r.get_submission(submission_id=id, comment_sort='best')
         original = sub.comments[0]
