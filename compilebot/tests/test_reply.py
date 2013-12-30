@@ -51,9 +51,9 @@ class TestParseComment(unittest.TestCase):
         self.assertRaises(AttributeError, cb.parse_comment, (body))
 
 class TestCreateReply(unittest.TestCase):
-
+    
+    # Simplified version of a PRAW comment for testing purposes
     class Comment(object):
-        """Simplified version of a PRAW comment object for testing"""
         def __init__(self, body):
             self.body = body
             self.id = reddit_id()
