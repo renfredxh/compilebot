@@ -289,7 +289,8 @@ def process_inbox(new, r):
         return
     # Search for a user mention preceded by a '+' which is the signal
     # for CompileBot to create a reply for that comment
-    if re.search(r'(?i)\+/u/{}'.format(R_USERNAME), new.body):
+    if (new.was_comment and 
+        re.search(r'(?i)\+/u/{}'.format(R_USERNAME), new.body)):
         reply = create_reply(new)
         if reply: 
             reply.send(new, r)
