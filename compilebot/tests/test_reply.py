@@ -118,7 +118,7 @@ class TestDetectSpam(unittest.TestCase):
             'stderr': ''
         }
         text = "Output:\n\n\n{}\n".format(spam)
-        reply = cb.CommentReply(text, details)
+        reply = cb.CompiledReply(text, details)
         reply.parent_comment = self.Comment()
         return reply
         

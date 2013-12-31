@@ -25,8 +25,8 @@ class Reply(object):
         """An abstract method that sends the reply."""
         raise NotImplementedError
             
-class CommentReply(Reply):
-
+class CompiledReply(Reply):
+    
     def __init__(self, text, compile_details):
         Reply.__init__(self, text)
         self.compile_details = compile_details
@@ -265,7 +265,7 @@ def create_reply(comment):
         log("Language error on comment {id}".format(id=comment.id))
         return MessageReply(error_reply)
     text = format_reply(details, opts)
-    return CommentReply(text, details)
+    return CompiledReply(text, details)
     
 def process_inbox(new, r):
     """Parse a new comment or message for various options and ignore reply 
@@ -315,7 +315,7 @@ def process_inbox(new, r):
             reply = create_reply(original)
             # Ensure the recompiled reply resulted in a valid comment
             # reply and not an error message reply.
-            if isinstance(reply, CommentReply):
+            if isinstance(reply, CompiledReply):
                 # Search for an existing comment reply from the bot.
                 # If one is found, edit the existing comment instead
                 # of creating a new one. 
@@ -339,7 +339,7 @@ def process_inbox(new, r):
                       "recompile your own comments.")
             log("Attempt to reompile on behalf of another author "
                 "detected. Request deined.")
-    if isinstance(reply, CommentReply):
+    if isinstance(reply, CompiledReply):
         spam = reply.detect_spam()
         if spam:
             text = ("Potential spam detected on comment {c.permalink} "
