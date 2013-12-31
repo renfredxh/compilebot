@@ -155,8 +155,9 @@ def get_banned(r):
     """Retrive list of banned users list from the moderator subreddit"""
     # Banned users are taken from the moderator subreddit 
     # banned users list
-    BANNED_USERS = {user.name.lower() for user in 
+    banned = {user.name.lower() for user in 
                     r.get_subreddit(SUBREDDIT).get_banned()}
+    return banned
 
 def format_reply(details, opts):
     """Returns a reply that contains the output from a ideone submission's 
