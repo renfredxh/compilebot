@@ -185,7 +185,7 @@ def format_reply(details, opts):
     body += 'Output:\n\n{}\n'.format(
         ('\n' + output).replace('\n', '\n    '))
     if details['cmpinfo']:
-        body += 'Compiler Message:\n\n{}\n\n'.format(
+        body += 'Compiler Info:\n\n{}\n\n'.format(
             details['cmpinfo'].replace('\n', '\n    '))
     # Combine extra runtime information
     if '--date' in opts:
