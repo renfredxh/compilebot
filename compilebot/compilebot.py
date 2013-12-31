@@ -394,6 +394,8 @@ R_PASSWORD = SETTINGS['reddit_pass']
 USER_AGENT = SETTINGS['user_agent']
 ADMIN = None#SETTINGS['admin_user']
 SUBREDDIT = SETTINGS['subreddit']
+# A set of users that are banned. The banned users list is retrieved
+# in the main session but not here because it requires a reddit login.
 BANNED_USERS = set()
 # Text
 ERROR_PREAMBLE = "There was an error processing your comment: {link}\n\n"
