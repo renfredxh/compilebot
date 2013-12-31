@@ -243,9 +243,9 @@ def create_reply(comment):
     try:
         args, src, stdin = parse_comment(comment.body)
     except AttributeError:
-        label = ("There was an error processing your comment: "
-                 "{link}\n\n".format(link=comment.permalink))
-        reply = label + ERROR_TEXT
+        preamble = ERROR_PREAMBLE.format(link=comment.permalink)
+        postable = ERROR_POSTAMBLE.format(link=comment.permalink)
+        reply = preamble + ERROR_TEXT + postable
         # TODO send author a PM 
         log("Formatting error on comment {c.id}: {c.body}".format(
             c=comment), alert=True)
@@ -263,13 +263,13 @@ def create_reply(comment):
         log("Compiled ideone submission {link} for {id}".format(
             link=details['link'], id=comment.id))
     except ideone.LanguageNotFoundError as e:
-        label = ("There was an error processing your comment: "
-                 "{link}\n\n".format(link=comment.permalink))
+        preamble = ERROR_PREAMBLE.format(link=comment.permalink)
+        postable = ERROR_POSTAMBLE.format(link=comment.permalink)
+        choices = ', '.join(e.similar_languages)
         error_reply = ("The language you requested (\"{lang}\"), was not "
                        "found. Perhaps you meant one of the following: "
-                       "{choices}").format(lang=lang, 
-                                           choices=e.similar_languages)
-        error_reply = label + error_reply
+                       "{choices}").format(lang=lang, choices=choices)
+        error_reply = preamble + error_reply + postamble
         # TODO Add link to accepted languages to msg
         log("Language error on comment {id}".format(id=comment.id))
         return MessageReply(error_reply)
@@ -395,6 +395,11 @@ USER_AGENT = SETTINGS['user_agent']
 ADMIN = None#SETTINGS['admin_user']
 SUBREDDIT = SETTINGS['subreddit']
 BANNED_USERS = set()
+# Text
+ERROR_PREAMBLE = "There was an error processing your comment: {link}\n\n"
+ERROR_POSTAMBLE = "You can edit your original comment and have it recompiled "
+                  "by replying to this message with the following command:"
+                  "\n\n--recompile {link}"
 HELP_TEXT = SETTINGS['help_text']
 ERROR_TEXT = SETTINGS['error_text']
 # Spam Settings
