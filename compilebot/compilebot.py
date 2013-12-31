@@ -27,13 +27,17 @@ class Reply(object):
             
 class CompiledReply(Reply):
     
+    """Replies that contain details about evaluated code. These can be 
+    sent as replies to comments.
+    
+    """
     def __init__(self, text, compile_details):
         Reply.__init__(self, text)
         self.compile_details = compile_details
         self.parent_comment = None
         
     def send(self, comment, r=None):
-        """Send a reply to a specific reddit comment."""
+        """Send a reply to a specific reddit comment or message."""
         self.parent_comment = comment
         self.recipient = comment.author
         try:
@@ -79,6 +83,10 @@ class CompiledReply(Reply):
 
 class MessageReply(Reply):
 
+    """Replies that contain information that may be sent to a reddit user
+    via private message. 
+    """
+    
     def __init__(self, text, subject=''):
         Reply.__init__(self, text)
         self.subject = subject
