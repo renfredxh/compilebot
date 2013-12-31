@@ -351,6 +351,7 @@ def main():
     r = praw.Reddit(USER_AGENT)
     r.login(R_USERNAME, R_PASSWORD)
     if SUBREDDIT:
+        global BANNED_USERS
         BANNED_USERS = get_banned(r)
     # Iterate though each new comment/message in the inbox and
     # process it appropriately
