@@ -264,7 +264,7 @@ def create_reply(comment):
             link=details['link'], id=comment.id))
     except ideone.LanguageNotFoundError as e:
         preamble = ERROR_PREAMBLE.format(link=comment.permalink)
-        postable = ERROR_POSTAMBLE.format(link=comment.permalink)
+        postamble = ERROR_POSTAMBLE.format(link=comment.permalink)
         choices = ', '.join(e.similar_languages)
         error_reply = ("The language you requested (\"{lang}\"), was not "
                        "found. Perhaps you meant one of the following: "
@@ -399,9 +399,9 @@ SUBREDDIT = SETTINGS['subreddit']
 BANNED_USERS = set()
 # Text
 ERROR_PREAMBLE = "There was an error processing your comment: {link}\n\n"
-ERROR_POSTAMBLE = "You can edit your original comment and have it recompiled "
-                  "by replying to this message with the following command:"
-                  "\n\n--recompile {link}"
+ERROR_POSTAMBLE = ("You can edit your original comment and have it "
+                  "recompiled by replying to this message with the following "
+                  "command:\n\n--recompile {link}")
 HELP_TEXT = SETTINGS['help_text']
 ERROR_TEXT = SETTINGS['error_text']
 # Spam Settings
