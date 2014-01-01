@@ -120,7 +120,7 @@ def log(message, alert=False):
         r = praw.Reddit(USER_AGENT)
         r.login(R_USERNAME, R_PASSWORD)
         # Indent text as markdown block for readability
-        admin_alert = ('\n' + message).replace('\n', '\n    ')
+        admin_alert = code_block(message)
         subject = "CompileBot Alert"
         r.send_message(ADMIN, subject, admin_alert)
     
@@ -151,6 +151,10 @@ def compile(source, lang, stdin=''):
     details['link'] = sub_link
     return details
 
+def code_block(text):
+    """Create a markdown formatted code block containing the given text"""
+    return ('\n' + text).replace('\n', '\n    ')
+    
 def get_banned(r):
     """Retrive list of banned users list from the moderator subreddit"""
     # Banned users are taken from the moderator subreddit 
@@ -166,12 +170,10 @@ def format_reply(details, opts):
     head, body, extra, footer = '', '', '', ''
     # Combine information that will go before the output
     if '--source' in opts:
-        head += 'Source:\n\n{}\n'.format(
-            ('\n' + details['source']).replace('\n', '\n    '))
+        head += 'Source:\n\n{}\n'.format(code_block(details['source']))
     if '--input' in opts:
-        head += 'Input:\n\n{}\n'.format(
-            ('\n' + details['input']).replace('\n', '\n    '))
     # Combine program output and runtime error output
+        head += 'Input:\n\n{}\n'.format(code_block(details['input']))
     output = details['output'] + details['stderr']
     # Truncate the output if it contains an excessive 
     # amount of line breaks or if it is too long.
@@ -182,11 +184,9 @@ def format_reply(details, opts):
     # Truncate the output if it is too long.
     if len(output) > 8000:
         output = output[:8000] + '\n    ...\n'
-    body += 'Output:\n\n{}\n'.format(
-        ('\n' + output).replace('\n', '\n    '))
+    body += 'Output:\n\n{}\n'.format(code_block(output))
     if details['cmpinfo']:
-        body += 'Compiler Info:\n\n{}\n\n'.format(
-            details['cmpinfo'].replace('\n', '\n    '))
+        body += 'Compiler Info:\n\n{}\n'.format(code_block(details['cmpinfo']))
     # Combine extra runtime information
     if '--date' in opts:
         extra += "Date: {}\n\n".format(details['date'])
