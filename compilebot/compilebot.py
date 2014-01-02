@@ -382,7 +382,7 @@ def process_inbox(new, r):
                       "recompile your own comments.")
             log("Attempt to reompile on behalf of another author "
                 "detected. Request deined.")
-    if isinstance(reply, CompiledReply):
+    if reply and isinstance(reply, CompiledReply):
         spam = reply.detect_spam()
         if spam:
             text = ("Potential spam detected on comment {c.permalink} "
