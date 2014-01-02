@@ -24,6 +24,14 @@ def reddit_id(length=6):
     return ''.join(random.choice(string.ascii_lowercase + 
                    string.digits) for x in range(length))
     
+def test_suite():
+    alltests = [
+        unittest.TestLoader().loadTestsFromTestCase(TestParseComment),
+        unittest.TestLoader().loadTestsFromTestCase(TestCreateReply),
+        unittest.TestLoader().loadTestsFromTestCase(TestDetectSpam)
+    ]
+    return unittest.TestSuite(alltests)
+    
 class TestParseComment(unittest.TestCase):
 
     def setUp(self):
@@ -172,15 +180,7 @@ class TestDetectSpam(unittest.TestCase):
         reply = self.create_reply(spam)
         reply.compile_details['stderr'] = "'rm -rf /*': Permission denied"
         self.assertIn("Illegal system call detected", reply.detect_spam())
-        
-     
-def test_suite():
-    alltests = [
-        unittest.TestLoader().loadTestsFromTestCase(TestParseComment),
-        unittest.TestLoader().loadTestsFromTestCase(TestCreateReply),
-        unittest.TestLoader().loadTestsFromTestCase(TestDetectSpam)
-    ]
-    return unittest.TestSuite(alltests)
+
      
 if __name__ == '__main__':
     unittest.main()
