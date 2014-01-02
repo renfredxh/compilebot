@@ -10,6 +10,11 @@ def main():
         while True:
             try:
                 bot.main()
+            except HTTPError as e:
+                # HTTP Errors may indicate reddit is overloaded.
+                # Sleep for some extra time. 
+                bot.log(str(e) + " ")
+                time.sleep(SLEEP_TIME*2)
             except Exception as e:
                 bot.log("Error running bot.main: {error}".format(
                         error=e), alert=True)
