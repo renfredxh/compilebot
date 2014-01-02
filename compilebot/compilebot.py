@@ -279,7 +279,7 @@ def create_reply(comment):
     # result is 15, if the program compiled but encountered a runtime
     # error the result is 12. Other codes indicate various errors.
     result_code = details['result'] 
-    if result_code == 15 or '--show-errors' in opts:
+    if result_code == 15 or '--include-errors' in opts:
         text = format_reply(details, opts)
     else:
         log("Result error {code} detected in comment {id}".format(
