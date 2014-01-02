@@ -273,7 +273,38 @@ def create_reply(comment):
         # TODO Add link to accepted languages to msg
         log("Language error on comment {id}".format(id=comment.id))
         return MessageReply(error_reply)
-    text = format_reply(details, opts)
+    # The ideone submission result value indicaties the final state of
+    # the program. If the program compiled and ran successfully the 
+    # result is 15, if the program compiled but encountered a runtime
+    # error the result is 12. Other codes indicate various errors.
+    result_code = details['result'] 
+    if result_code == 15 or '--show-errors' in opts:
+        text = format_reply(details, opts)
+    else:
+        log("Result error {code} detected in comment {id}".format(
+            code=result_code, id=comment.id))
+        preamble = ERROR_PREAMBLE.format(link=comment.permalink)
+        postamble = ERROR_POSTAMBLE.format(link=comment.permalink)
+        error_reply = {
+            11: COMPILE_ERROR_TEXT,
+            12: RUNTIME_ERROR_TEXT,
+            13: TIMEOUT_ERROR_TEXT,
+            17: MEMORY_ERROR_TEXT,
+            19: ILLEGAL_ERROR_TEXT,
+            20: INTERNAL_ERROR_TEXT          
+        }.get(result_code, '')
+        # Include any output from the submission in the reply
+        if details['cmpinfo']:
+            error_reply += "Compiler Output:\n\n{}\n\n".format(
+                                code_block(details['cmpinfo']))
+        if details['output']:
+            error_reply += "Output:\n\n{}\n\n".format(
+                    code_block(details['cmpinfo']))                
+        if details['stderr']:
+            error_reply += "Error Output:\n\n{}\n\n".format(
+                                code_block(details['stderr']))
+        error_reply = preamble + error_reply + postamble
+        return MessageReply(error_reply)
     return CompiledReply(text, details)
     
 def process_inbox(new, r):
