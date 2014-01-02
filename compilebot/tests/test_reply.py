@@ -101,6 +101,32 @@ class TestCreateReply(unittest.TestCase):
         self.assertIsInstance(reply, cb.MessageReply)
         self.assertTrue(all(lang in reply.text for lang in similar_langs))
         
+    def test_result_errors(self):
+        # Test each error code and ensure the user will be alerted of
+        # errors via private message instead of in compiled replies
+        for error_code in [13, 17, 19, 20, 12]:
+            def compile(*args, **kwargs):
+                return {
+                    'cmpinfo': "",
+                    'input': "",
+                    'langName': "Python",
+                    'output': "Test",
+                    'result': error_code,
+                    'stderr': "Error message",
+                    'link': ""
+                }
+            cb.compile = compile
+            body = ("+/u/{user} python\n\n"
+                    "    error\n\n".format(user=self.user))
+            comment = self.Comment(body)
+            reply = cb.create_reply(comment)
+            self.assertIsInstance(reply, cb.MessageReply)
+        body = ("+/u/{user} python --include-errors\n\n"
+                "    error\n\n".format(user=self.user))
+        comment = self.Comment(body)
+        reply = cb.create_reply(comment)
+        self.assertIsInstance(reply, cb.CompiledReply)
+        
     def tearDown(self):
         reload(cb)
         
