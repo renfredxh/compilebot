@@ -6,9 +6,12 @@ from imp import reload
 import compilebot as cb
 
 """
-Unit test cases for functions that format, create, and edit replies.
+Unit test cases for functions, methods, and classes that format, create, 
+and edit replies. All tests in this module shouldn't make any requests 
+to reddit or ideone.
 
-Run from parent directory: python -m unittest tests.test_reply
+Run the following command from the parent directory in order to run only
+this test module: python -m unittest tests.test_reply
 """
 
 cb.USER_AGENT = "compilebot unit tests run by {}".format(cb.R_USERNAME)
