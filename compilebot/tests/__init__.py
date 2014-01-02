@@ -1,1 +1,1 @@
-__all__ = ['test_reply']
+__all__ = ['test_reply', 'test_compiler']
