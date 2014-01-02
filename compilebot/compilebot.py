@@ -331,7 +331,17 @@ def process_inbox(new, r):
           re.match(r'(i?)\s*--help', new.body)):
         # Message a user the help text if comment is a message
         # containing "--help".
-        reply = MessageReply(HELP_TEXT, subject='Help')
+        reply = MessageReply(HELP_TEXT, subject='CompileBot Help')
+        reply.send(new, r)
+    elif ((not new.was_comment) and 
+          re.match(r'(i?)\s*--report', new.body) and SUBREDDIT):
+        sub = r.get_subreddit(SUBREDDIT)
+        # Forward a report message to the moderators
+        r.send_message(sub, "Report from {author}",format(author=new.author),
+                       new.body) 
+        reply = MessageReply("Your message has been forwarded to the "
+                             "moderators. Thank you.",
+                             subject="CompileBot Report")
         reply.send(new, r)
     elif ((not new.was_comment) and 
           re.match(r'(i?)\s*--recompile', new.body)):
