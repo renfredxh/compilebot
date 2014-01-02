@@ -261,7 +261,7 @@ def create_reply(comment):
     lang = lang.strip()
     try:
         details = compile(src, lang, stdin=stdin)
-        log("Compiled ideone submission {link} for {id}".format(
+        log("Compiled ideone submission {link} for comment {id}".format(
             link=details['link'], id=comment.id))
     except ideone.LanguageNotFoundError as e:
         preamble = ERROR_PREAMBLE.format(link=comment.permalink)
