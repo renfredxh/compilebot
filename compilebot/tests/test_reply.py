@@ -170,5 +170,14 @@ class TestDetectSpam(unittest.TestCase):
         reply.compile_details['stderr'] = "'rm -rf /*': Permission denied"
         self.assertIn("Illegal system call detected", reply.detect_spam())
         
+     
+def test_suite():
+    alltests = [
+        unittest.TestLoader().loadTestsFromTestCase(TestParseComment),
+        unittest.TestLoader().loadTestsFromTestCase(TestCreateReply),
+        unittest.TestLoader().loadTestsFromTestCase(TestDetectSpam)
+    ]
+    return unittest.TestSuite(alltests)
+     
 if __name__ == '__main__':
     unittest.main()
