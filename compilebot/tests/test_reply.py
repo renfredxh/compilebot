@@ -15,9 +15,7 @@ this test module: python -m unittest tests.test_reply
 """
 
 cb.USER_AGENT = "compilebot unit tests run by {}".format(cb.R_USERNAME)
-
-def log(text, *args, **kwargs):
-    print(text)
+cb.LOG_FILE = "tests.log"
 
 def reddit_id(length=6):
     """Emulate a reddit id with a random string of letters and digits"""
@@ -31,7 +29,8 @@ def test_suite():
         unittest.TestLoader().loadTestsFromTestCase(TestDetectSpam)
     ]
     return unittest.TestSuite(alltests)
-    
+
+
 class TestParseComment(unittest.TestCase):
 
     def setUp(self):
@@ -96,6 +95,7 @@ class TestCreateReply(unittest.TestCase):
         comment = self.Comment(body)
         reply = cb.create_reply(comment)
         self.assertIsInstance(reply, cb.MessageReply)
+        self.assertIn(cb.FORMAT_ERROR_TEXT, reply.text)
         
     def test_missing_language(self):
         def compile(*args, **kwargs):
@@ -168,10 +168,10 @@ class TestDetectSpam(unittest.TestCase):
         spam = "a" * (cb.CHAR_LIMIT + 1)
         reply = self.create_reply(spam)
         self.assertIn("Excessive character count", reply.detect_spam())
-    
-    @unittest.skipIf(len(cb.SPAM_PHRASES) < 1, "No spam phrases set")    
+       
     def test_spam_phrases(self):
-        spam = cb.SPAM_PHRASES[0]
+        spam = "Spam Phrase"
+        cb.SPAM_PHRASES.append(spam)
         reply = self.create_reply(spam)
         self.assertIn("Spam phrase detected", reply.detect_spam())
         
