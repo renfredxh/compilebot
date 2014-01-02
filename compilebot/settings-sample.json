@@ -5,12 +5,22 @@
   "ideone_pass": "<your ideone password>",
   "admin_user": "", // optional reddit username for receiving admin alerts
   "user_agent": "Code compilation bot tester /u/<your reddit username>",
-  "help_text": "Help text coming soon",
   "error_text": "There was an error processing your comment.",
   "subreddit": "", // optional moderator subreddit
   "spam": {
     "line_limit": 200,
     "char_limit": 4000,
     "spam_phrases": ["rm","-rf"]
+  },
+  "text": {
+    "help_text": "Help Text",
+    "format_error_text": "Format Error\n\n",
+    "compile_error_text": "Compile Error\n\n",
+    "runtime_error_text": "Runtime Error\n\n",
+    "timeout_error_text": "Timeout Error\n\n",
+    "memory_error_text": "Memory Error\n\n",
+    "illegal_error_text": "Illegal Error\n\n",
+    "internal_error_text": "Internal Error\n\n",
+    "recompile_error_text": "Recompile Error\n\n"
   }
 }
