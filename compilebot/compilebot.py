@@ -276,9 +276,10 @@ def create_reply(comment):
         return MessageReply(error_reply)
     # The ideone submission result value indicaties the final state of
     # the program. If the program compiled and ran successfully the 
-    # result is 15, if the program compiled but encountered a runtime
-    # error the result is 12. Other codes indicate various errors.
+    # result is 15. Other codes indicate various errors.
     result_code = details['result'] 
+    # The user is alerted of any errors via message reply unless they
+    # include an option to include errors in the reply
     if result_code == 15 or '--include-errors' in opts:
         text = format_reply(details, opts)
     else:
