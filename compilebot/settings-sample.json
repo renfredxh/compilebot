@@ -13,7 +13,7 @@
     "spam_phrases": ["rm","-rf"]
   },
   "text": {
-    "footer": "\n\n[^source](https://github.com/renfredxh/compilebot) ^| [^info](http://www.reddit.com/r/CompileBot/wiki) ^| [^report](http://www.reddit.com/message/compose?to=compilebot&subject=Report%20Abuse&message=--report%20%20Include%20your%20reason%20for%20reporting%20here.)",
+    "footer": "\n\n[^source]({ide_link}) ^| [^info](http://www.reddit.com/r/CompileBot/wiki) ^| [^github](https://github.com/renfredxh/compilebot) ^| [^report](http://www.reddit.com/message/compose?to=compilebot&subject=Report%20Abuse&message=--report%20{perm_link}%20Include%20your%20reason%20for%20reporting%20here.)",
     "help_text": "Help Text",
     "format_error_text": "Format Error\n\n",
     "compile_error_text": "Compile Error\n\n",

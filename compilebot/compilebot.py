@@ -4,6 +4,7 @@ import time
 import praw
 import re
 import json
+import urllib
 import traceback
 
 class Reply(object):
@@ -167,7 +168,7 @@ def format_reply(details, opts):
     """Returns a reply that contains the output from a ideone submission's 
     details along with optional additional information.
     """
-    head, body, extra, footer = '', '', '', FOOTER
+    head, body, extra, = '', '', ''
     # Combine information that will go before the output
     if '--source' in opts:
         head += 'Source:\n\n{}\n'.format(code_block(details['source']))
@@ -200,11 +201,11 @@ def format_reply(details, opts):
     # sections of the reply until they are of adequate length. Certain
     # sections with less priority will be shortened before others.
     total_len = 0
-    for section in (footer, body, head, extra):
+    for section in (FOOTER, body, head, extra):
         if len(section) + total_len > 9800:
             section = section[:9800 - total_len] + '\n...\n'
             total_len += len(section)
-    reply_text = head + body + extra + footer
+    reply_text = head + body + extra
     return reply_text
 
 def parse_comment(body):
@@ -282,6 +283,9 @@ def create_reply(comment):
     # include an option to include errors in the reply
     if result_code == 15 or '--include-errors' in opts:
         text = format_reply(details, opts)
+        ideone_link = "http://ideone.com/{}".format(details['link'])
+        url_pl = urllib.quote(comment.permalink) 
+        text += FOOTER.format(ide_link=ideone_link, perm_link=url_pl)
     else:
         log("Result error {code} detected in comment {id}".format(
             code=result_code, id=comment.id))
