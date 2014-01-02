@@ -256,6 +256,7 @@ def create_reply(comment):
         lang, opts = args.split(' -', 1)
         opts = ('-' + opts).split()
     except ValueError:
+        # No additional opts found
         lang, opts = args, []
     lang = lang.strip()
     try:
