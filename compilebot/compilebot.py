@@ -244,8 +244,8 @@ def create_reply(comment):
         args, src, stdin = parse_comment(comment.body)
     except AttributeError:
         preamble = ERROR_PREAMBLE.format(link=comment.permalink)
-        postable = ERROR_POSTAMBLE.format(link=comment.permalink)
-        reply = preamble + ERROR_TEXT + postable
+        postamble = ERROR_POSTAMBLE.format(link=comment.permalink)
+        reply = preamble + FORMAT_ERROR_TEXT + postamble
         # TODO send author a PM 
         log("Formatting error on comment {c.id}: {c.body}".format(
             c=comment), alert=True)
@@ -312,7 +312,7 @@ def process_inbox(new, r):
         try:
             id = m.group('id')
         except AttributeError:
-            new.reply("Error recompiling")
+            new.reply(RECOMPILE_ERROR_TEXT)
         # Fetch the comment that will be recompiled.
         sub = r.get_submission(submission_id=id, comment_sort='best')
         original = sub.comments[0]
@@ -398,12 +398,20 @@ SUBREDDIT = SETTINGS['subreddit']
 # in the main session but not here because it requires a reddit login.
 BANNED_USERS = set()
 # Text
+TEXT = SETTINGS['text']
 ERROR_PREAMBLE = "There was an error processing your comment: {link}\n\n"
 ERROR_POSTAMBLE = ("You can edit your original comment and have it "
                   "recompiled by replying to this message with the following: "
                   "\n\n--recompile {link}")
-HELP_TEXT = SETTINGS['help_text']
-ERROR_TEXT = SETTINGS['error_text']
+HELP_TEXT = TEXT['help_text']
+FORMAT_ERROR_TEXT = TEXT['format_error_text']
+COMPILE_ERROR_TEXT = TEXT['compile_error_text']
+RUNTIME_ERROR_TEXT = TEXT['runtime_error_text']
+TIMEOUT_ERROR_TEXT = TEXT['timeout_error_text']
+MEMORY_ERROR_TEXT = TEXT['memory_error_text']
+ILLEGAL_ERROR_TEXT = TEXT['illegal_error_text']
+INTERNAL_ERROR_TEXT =  TEXT['internal_error_text']
+RECOMPILE_ERROR_TEXT = TEXT['recompile_error_text']
 # Spam Settings
 LINE_LIMIT = SETTINGS["spam"]["line_limit"]
 CHAR_LIMIT = SETTINGS["spam"]["char_limit"]
