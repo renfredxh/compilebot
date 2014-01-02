@@ -17,7 +17,7 @@ def log(text, *args, **kwargs):
     print(text)
 
 def reddit_id(length=6):
-    "Emulate a reddit id with a random string of letters and digits"
+    """Emulate a reddit id with a random string of letters and digits"""
     return ''.join(random.choice(string.ascii_lowercase + 
                    string.digits) for x in range(length))
     
@@ -71,7 +71,7 @@ class TestCreateReply(unittest.TestCase):
                 'output': "Test",
                 'result': 15,
                 'stderr': "",
-                'link': ''
+                'link': ""
             }
         cb.compile = compile
         body = ("+/u/{user} python\n\n"
