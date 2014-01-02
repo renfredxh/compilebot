@@ -167,7 +167,7 @@ def format_reply(details, opts):
     """Returns a reply that contains the output from a ideone submission's 
     details along with optional additional information.
     """
-    head, body, extra, footer = '', '', '', ''
+    head, body, extra, footer = '', '', '', FOOTER
     # Combine information that will go before the output
     if '--source' in opts:
         head += 'Source:\n\n{}\n'.format(code_block(details['source']))
@@ -198,13 +198,13 @@ def format_reply(details, opts):
         extra += "Version: {}\n\n".format(details['langVersion'])
     # To ensure the reply is less than 10000 characters long, shorten
     # sections of the reply until they are of adequate length. Certain
-    # sections with less priority will be shorted before others.
-    reply_text = ''
-    for section in (body, head, extra):
-        if len(section) + len(reply_text) > 9800:
-            section = section[:9800 - len(reply_text)] + '\n...\n'
-        reply_text += section 
-    reply_text += footer
+    # sections with less priority will be shortened before others.
+    total_len = 0
+    for section in (footer, body, head, extra):
+        if len(section) + total_len > 9800:
+            section = section[:9800 - total_len] + '\n...\n'
+            total_len += len(section)
+    reply_text = head + body + extra + footer
     return reply_text
 
 def parse_comment(body):
@@ -432,6 +432,7 @@ SUBREDDIT = SETTINGS['subreddit']
 BANNED_USERS = set()
 # Text
 TEXT = SETTINGS['text']
+FOOTER = TEXT['footer']
 ERROR_PREAMBLE = "There was an error processing your comment: {link}\n\n"
 ERROR_POSTAMBLE = ("You can edit your original comment and have it "
                   "recompiled by replying to this message with the following: "
