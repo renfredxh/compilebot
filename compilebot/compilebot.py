@@ -246,11 +246,10 @@ def create_reply(comment):
     except AttributeError:
         preamble = ERROR_PREAMBLE.format(link=comment.permalink)
         postamble = ERROR_POSTAMBLE.format(link=comment.permalink)
-        reply = preamble + FORMAT_ERROR_TEXT + postamble
-        # TODO send author a PM 
+        error_text = preamble + FORMAT_ERROR_TEXT + postamble
         log("Formatting error on comment {c.id}: {c.body}".format(
             c=comment), alert=True)
-        return MessageReply(reply)
+        return MessageReply(error_text)
     # Seperate the language name from the rest of the supplied options
     # TODO seperate args and lang in a more robust way
     try:
@@ -268,13 +267,13 @@ def create_reply(comment):
         preamble = ERROR_PREAMBLE.format(link=comment.permalink)
         postamble = ERROR_POSTAMBLE.format(link=comment.permalink)
         choices = ', '.join(e.similar_languages)
-        error_reply = ("The language you requested (\"{lang}\"), was not "
+        error_text = ("The language you requested (\"{lang}\"), was not "
                        "found. Perhaps you meant one of the following: "
                        "{choices}").format(lang=lang, choices=choices)
-        error_reply = preamble + error_reply + postamble
+        error_text = preamble + error_text + postamble
         # TODO Add link to accepted languages to msg
         log("Language error on comment {id}".format(id=comment.id))
-        return MessageReply(error_reply)
+        return MessageReply(error_text)
     # The ideone submission result value indicaties the final state of
     # the program. If the program compiled and ran successfully the 
     # result is 15. Other codes indicate various errors.
@@ -291,7 +290,7 @@ def create_reply(comment):
             code=result_code, id=comment.id))
         preamble = ERROR_PREAMBLE.format(link=comment.permalink)
         postamble = ERROR_POSTAMBLE.format(link=comment.permalink)
-        error_reply = {
+        error_text = {
             11: COMPILE_ERROR_TEXT,
             12: RUNTIME_ERROR_TEXT,
             13: TIMEOUT_ERROR_TEXT,
@@ -301,16 +300,16 @@ def create_reply(comment):
         }.get(result_code, '')
         # Include any output from the submission in the reply
         if details['cmpinfo']:
-            error_reply += "Compiler Output:\n\n{}\n\n".format(
+            error_text += "Compiler Output:\n\n{}\n\n".format(
                                 code_block(details['cmpinfo']))
         if details['output']:
-            error_reply += "Output:\n\n{}\n\n".format(
+            error_text += "Output:\n\n{}\n\n".format(
                     code_block(details['cmpinfo']))                
         if details['stderr']:
-            error_reply += "Error Output:\n\n{}\n\n".format(
+            error_text += "Error Output:\n\n{}\n\n".format(
                                 code_block(details['stderr']))
-        error_reply = preamble + error_reply + postamble
-        return MessageReply(error_reply)
+        error_text = preamble + error_text + postamble
+        return MessageReply(error_text)
     return CompiledReply(text, details)
     
 def process_inbox(new, r):
