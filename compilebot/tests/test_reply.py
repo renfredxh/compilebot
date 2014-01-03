@@ -140,6 +140,187 @@ class TestCreateReply(unittest.TestCase):
         
     def tearDown(self):
         reload(cb)
+
+class TestProcessUnread(unittest.TestCase):
+    
+    # The following classes are meant to emulate various PRAW objects
+    # They do not contain all of the same attributes if the original
+    # PRAW class, but only the necessary ones needed for testing the
+    # process_unread function.
+    
+    class Reddit(object):
+        def __init__(self):
+            self._sent_message = False
+            self._message_recipient = ''
+            self._message_subject = ''
+            self._message_text = ''
+            # Allows a custom comment to be assigned that is used to
+            # verify if get_submission is working correctly 
+            self._get_sub_comment = None
+            
+        def get_subreddit(*args, **kwargs):
+            pass
+            
+        def send_message(self, recipient, subject, text, **kwargs):
+            self._sent_message = True
+            self._message_recipient = recipient
+            self._message_subject = subject
+            self._message_text = text
+            
+        def get_submission(self, *args, **kwargs):
+            s = TestProcessUnread.Submission()
+            if kwargs.get('submission_id') == self._get_sub_comment.permalink:
+                s.comments.append(self._get_sub_comment)
+            return s
+    
+    class Submission(object):
+        def __init__(self):
+            self.comments = []
+            
+    class Repliable(object):
+        def __init__(self, author=None, body='', reddit_session=None, replies=[]):
+            self.author = author or TestProcessUnread.Author()
+            self.body = body
+            self.replies = replies
+            self.id = reddit_id()
+            self.reddit_session = reddit_session
+            self._replied_to = False
+            self._reply_text = ''    
+        
+        def reply(self, text):
+            self._replied_to = True
+            self._reply_text = text
+    
+    class Author(object):
+        def __init__(self, name=''):
+            self.name = name
+            
+        def __eq__(self, other):
+            return self.name == other.name
+            
+        def __ne__(self, other):
+            return self.name != other.name
+            
+        def __str__(self):
+            return self.name
+            
+    class Message(Repliable):
+        def __init__(self, *args,  **kwargs):
+            TestProcessUnread.Repliable.__init__(self, *args, **kwargs)
+            self.was_comment = False
+            
+    class Comment(Repliable):
+        def __init__(self, *args, **kwargs):
+            TestProcessUnread.Repliable.__init__(self, *args, **kwargs)
+            self.was_comment = True
+            self.permalink = reddit_id() + '/test/' + self.id
+            self._edited = False
+            self._edit_text = ''
+            
+        def edit(self, text):
+            self._edited = True
+            self._edit_text = text
+    
+    def setUp(self):
+        self.r = self.Reddit()
+        self.user = cb.R_USERNAME
+         
+    def test_process_reply(self):
+    
+        def compile(*args, **kwargs):
+            return {
+                'cmpinfo': '', 'error': 'OK', 'input': "Hello World",
+                'langId': 116, 'link': '', 'langName': "Python 3",
+                'output': "Hello World\n", 'public': True, 'result': 15,
+                'signal': 0, 'source': "x = input()\nprint(x)", 'status': 0,
+                'stderr': "",
+            }
+        
+        cb.compile = compile
+        body = "+/u/CompileBot python 3\n\n    x = input()\n    print(x)\n\n"
+        new = self.Comment(body=body, reddit_session=self.r)
+        cb.process_unread(new, self.r)
+        self.assertTrue(new._replied_to)
+        self.assertIn("Output:\n\n    Hello World", new._reply_text)
+        
+    def test_help_request(self):
+        new = self.Message(body="--help", reddit_session=self.r)
+        cb.process_unread(new, self.r)
+        self.assertTrue(self.r._sent_message)
+        self.assertIn(cb.HELP_TEXT, self.r._message_text)
+        
+    def test_banned_filter(self):
+        cb.BANNED_USERS.add("Banned-User-01")
+        new = self.Comment(author=self.Author(name="Banned-User-01"))
+        cb.process_unread(new, self.r)
+        self.assertFalse(new._replied_to)
+        
+    def test_recompile_request(self):
+    
+        def compile(*args, **kwargs):
+            return {
+                'cmpinfo': '', 'error': 'OK', 'input': "Hello World",
+                'langId': 116, 'link': '', 'langName': "Python 3",
+                'output': "Hello World\n", 'public': True, 'result': 15,
+                'signal': 0, 'source': "x = input()\nprint(x)", 'status': 0,
+                'stderr': "",
+            }
+        
+        cb.compile = compile
+        # Create the comment that will be recompiled.    
+        body = "+/u/CompileBot python 3\n\n    x = input()\n    print(x)\n\n"
+        original = self.Comment(body=body, reddit_session=self.r)
+        self.r._get_sub_comment = original
+        # Message that makes the recompile request.
+        body = "--recompile {link}".format(link=original.permalink)
+        new = self.Message(body=body, reddit_session=self.r)
+        cb.process_unread(new, self.r)
+        self.assertTrue(original._replied_to)
+        
+    def test_recompile_edit(self):
+        # Ensure that if there is an existing reply from a bot on a 
+        # comment that is being recompiled, the existing reply is 
+        # editing instead of making a new comment.
+        def compile(*args, **kwargs):
+            return {
+                'cmpinfo': '', 'error': 'OK', 'input': "Hello World",
+                'langId': 116, 'link': '', 'langName': "Python 3",
+                'output': "Test\n", 'public': True, 'result': 15,
+                'signal': 0, 'source': "print(\"Test\")", 'status': 0,
+                'stderr': "",
+            }
+            
+        cb.compile = compile
+        existing_reply = self.Comment(author=self.Author(self.user))
+        body = "+/u/CompileBot python 3\n\n    print(\"test\")\n\n"
+        
+        replies = [existing_reply]
+        original = self.Comment(body=body, reddit_session=self.r, 
+                                replies=replies)
+        self.r._get_sub_comment = original
+        
+        body = "--recompile {link}".format(link=original.permalink)
+        new = self.Message(body=body, reddit_session=self.r)
+        cb.process_unread(new, self.r)
+        self.assertTrue(existing_reply._edited)
+        self.assertIn("Output:\n\n    Test", existing_reply._edit_text)
+        self.assertFalse(original._replied_to)
+    
+    def test_recompile_user_permissions(self):
+        # Ensure users aren't allowed to make recompile requests of behalf
+        # of other users.
+        original = self.Comment(reddit_session=self.r, 
+                                author=self.Author("Author-1"))
+        self.r._get_sub_comment = original
+        body = "--recompile {link}".format(link=original.permalink)
+        new = self.Message(body=body, reddit_session=self.r, 
+                           author=self.Author("Author-2"))
+        cb.process_unread(new, self.r)
+        self.assertFalse(original._replied_to)
+        self.assertTrue(new._replied_to)
+        
+    def tearDown(self):
+        reload(cb)
         
 class TestDetectSpam(unittest.TestCase):
     
