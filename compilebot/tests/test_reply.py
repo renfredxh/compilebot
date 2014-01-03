@@ -88,7 +88,7 @@ class TestCreateReply(unittest.TestCase):
                 "    print(\"Test\")\n\n".format(user=self.user))
         comment = self.Comment(body)
         reply = cb.create_reply(comment)
-        self.assertIn("Output:\n\n\n    Test\n", reply.text)
+        self.assertIn("Output:\n\n    Test\n", reply.text)
         
     def test_bad_format(self):
         body = "+/u/{user} Formatted incorrectly".format(user=self.user)
