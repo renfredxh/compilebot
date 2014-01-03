@@ -23,10 +23,11 @@ def reddit_id(length=6):
                    string.digits) for x in range(length))
     
 def test_suite():
+    cases = [
+        TestParseComment, TestCreateReply, TestProcessUnread, TestDetectSpam
+    ]
     alltests = [
-        unittest.TestLoader().loadTestsFromTestCase(TestParseComment),
-        unittest.TestLoader().loadTestsFromTestCase(TestCreateReply),
-        unittest.TestLoader().loadTestsFromTestCase(TestDetectSpam)
+        unittest.TestLoader().loadTestsFromTestCase(case) for case in cases
     ]
     return unittest.TestSuite(alltests)
 

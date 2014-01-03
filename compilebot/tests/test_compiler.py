@@ -14,8 +14,11 @@ cb.USER_AGENT = "compilebot unit tests run by {}".format(cb.R_USERNAME)
 cb.LOG_FILE = "tests.log"
 
 def test_suite():
+    cases = [
+        TestCompile
+    ]
     alltests = [
-        unittest.TestLoader().loadTestsFromTestCase(TestCompile),
+        unittest.TestLoader().loadTestsFromTestCase(case) for case in cases
     ]
     return unittest.TestSuite(alltests)
     
