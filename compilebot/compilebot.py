@@ -172,10 +172,10 @@ def format_reply(details, opts):
     head, body, extra, = '', '', ''
     # Combine information that will go before the output
     if '--source' in opts:
-        head += 'Source:\n\n{}\n'.format(code_block(details['source']))
+        head += 'Source:\n{}\n\n'.format(code_block(details['source']))
     if '--input' in opts:
     # Combine program output and runtime error output
-        head += 'Input:\n\n{}\n'.format(code_block(details['input']))
+        head += 'Input:\n{}\n\n'.format(code_block(details['input']))
     output = details['output'] + details['stderr']
     # Truncate the output if it contains an excessive 
     # amount of line breaks or if it is too long.
@@ -186,9 +186,9 @@ def format_reply(details, opts):
     # Truncate the output if it is too long.
     if len(output) > 8000:
         output = output[:8000] + '\n    ...\n'
-    body += 'Output:\n\n{}\n'.format(code_block(output))
+    body += 'Output:\n{}\n\n'.format(code_block(output))
     if details['cmpinfo']:
-        body += 'Compiler Info:\n\n{}\n'.format(code_block(details['cmpinfo']))
+        body += 'Compiler Info:\n{}\n\n'.format(code_block(details['cmpinfo']))
     # Combine extra runtime information
     if '--date' in opts:
         extra += "Date: {}\n\n".format(details['date'])
