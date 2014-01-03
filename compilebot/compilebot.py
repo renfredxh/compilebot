@@ -140,6 +140,7 @@ def compile(source, lang, stdin=''):
     Hello World
 
     """ 
+    lang = LANG_SHORTCUTS.get(lang.lower(), lang)
     # Login to ideone and create a submission
     i = ideone.Ideone(I_USERNAME, I_PASSWORD)
     sub = i.create_submission(source, language_name=lang, std_input=stdin)
@@ -443,6 +444,7 @@ R_PASSWORD = SETTINGS['reddit_pass']
 USER_AGENT = SETTINGS['user_agent']
 ADMIN = None#SETTINGS['admin_user']
 SUBREDDIT = SETTINGS['subreddit']
+LANG_SHORTCUTS = {k.lower(): v for k, v in SETTINGS['lang_shortcuts'].items()}
 # A set of users that are banned. The banned users list is retrieved
 # in the main session but not here because it requires a reddit login.
 BANNED_USERS = set()

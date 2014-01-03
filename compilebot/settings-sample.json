@@ -12,6 +12,9 @@
     "char_limit": 4000,
     "spam_phrases": ["rm","-rf"]
   },
+  "lang_shortcuts": {
+    "C++": "C++11"
+  },
   "text": {
     "footer": "\n\n[^source]({ide_link}) ^| [^info](http://www.reddit.com/r/CompileBot/wiki) ^| [^github](https://github.com/renfredxh/compilebot) ^| [^report](http://www.reddit.com/message/compose?to=compilebot&subject=Report%20Abuse&message=--report%20{perm_link}%20Include%20your%20reason%20for%20reporting%20here.)",
     "help_text": "Help Text",
