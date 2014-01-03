@@ -313,10 +313,11 @@ def create_reply(comment):
         return MessageReply(error_text)
     return CompiledReply(text, details)
     
-def process_inbox(new, r):
+def process_unread(new, r):
     """Parse a new comment or message for various options and ignore reply 
     to as appropriate.
     """
+    reply = None
     sender = new.author
     log("New {type} {id} from {sender}".format(
         type="mention" if new.was_comment else "message",
@@ -416,7 +417,7 @@ def main():
     inbox = r.get_unread()
     for new in inbox:
         try:
-            process_inbox(new, r)
+            process_unread(new, r)
         except:
             tb = traceback.format_exc()
             # Notify admin of any errors
