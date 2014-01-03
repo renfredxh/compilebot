@@ -360,6 +360,7 @@ def process_inbox(new, r):
             id = m.group('id')
         except AttributeError:
             new.reply(RECOMPILE_ERROR_TEXT)
+            return
         # Fetch the comment that will be recompiled.
         sub = r.get_submission(submission_id=id, comment_sort='best')
         original = sub.comments[0]
