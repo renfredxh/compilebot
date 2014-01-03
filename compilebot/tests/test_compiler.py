@@ -3,12 +3,11 @@ import unittest
 import compilebot as cb
 
 """
-Unit test cases for functions, methods, and classes that format, create, 
-and edit replies. All tests in this module shouldn't make any requests 
-to reddit or ideone.
+Unit test cases for the compile function. Tests require an ideone login
+credentials.
 
 Run the following command from the parent directory in order to run only
-this test module: python -m unittest tests.test_reply
+this test module: python -m unittest tests.test_compiler
 """
 
 cb.USER_AGENT = "compilebot unit tests run by {}".format(cb.R_USERNAME)
