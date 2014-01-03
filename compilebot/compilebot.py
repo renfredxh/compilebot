@@ -37,7 +37,7 @@ class CompiledReply(Reply):
         self.compile_details = compile_details
         self.parent_comment = None
         
-    def send(self, comment, r=None):
+    def send(self, comment):
         """Send a reply to a specific reddit comment or message."""
         self.parent_comment = comment
         self.recipient = comment.author
@@ -92,11 +92,12 @@ class MessageReply(Reply):
         Reply.__init__(self, text)
         self.subject = subject
 
-    def send(self, comment, r):
+    def send(self, comment):
         """Reply the author of a reddit comment by sending them a reply
         via private message.
         """
         self.recipient = comment.author
+        r = comment.reddit_session
         # If no custom subject line is given, the default will be a label
         # that identifies the comment.
         if not self.subject:
@@ -329,13 +330,13 @@ def process_inbox(new, r):
         re.search(r'(?i)\+/u/{}'.format(R_USERNAME), new.body)):
         reply = create_reply(new)
         if reply: 
-            reply.send(new, r)
+            reply.send(new)
     elif ((not new.was_comment) and 
           re.match(r'(i?)\s*--help', new.body)):
         # Message a user the help text if comment is a message
         # containing "--help".
         reply = MessageReply(HELP_TEXT, subject='CompileBot Help')
-        reply.send(new, r)
+        reply.send(new)
     elif ((not new.was_comment) and 
           re.match(r'(i?)\s*--report', new.body) and SUBREDDIT):
         sub = r.get_subreddit(SUBREDDIT)
@@ -345,7 +346,7 @@ def process_inbox(new, r):
         reply = MessageReply("Your message has been forwarded to the "
                              "moderators. Thank you.",
                              subject="CompileBot Report")
-        reply.send(new, r)
+        reply.send(new)
     elif ((not new.was_comment) and 
           re.match(r'(i?)\s*--recompile', new.body)):
         # Search for the recompile command followed by a comment id.
@@ -389,7 +390,7 @@ def process_inbox(new, r):
                 else:
                     reply.send(original)
             else:
-                reply.send(new, r)
+                reply.send(new)
         else:
             new.reply("Error recompiing. You can only request to "
                       "recompile your own comments.")
