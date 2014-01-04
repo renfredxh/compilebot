@@ -440,7 +440,7 @@ I_PASSWORD = SETTINGS['ideone_pass']
 R_USERNAME = SETTINGS['reddit_user']
 R_PASSWORD = SETTINGS['reddit_pass']
 USER_AGENT = SETTINGS['user_agent']
-ADMIN = None#SETTINGS['admin_user']
+ADMIN = SETTINGS['admin_user']
 SUBREDDIT = SETTINGS['subreddit']
 LANG_SHORTCUTS = {k.lower(): v for k, v in SETTINGS['lang_shortcuts'].items()}
 # A set of users that are banned. The banned users list is retrieved
