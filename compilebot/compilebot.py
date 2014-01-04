@@ -449,10 +449,8 @@ BANNED_USERS = set()
 # Text
 TEXT = SETTINGS['text']
 FOOTER = TEXT['footer']
-ERROR_PREAMBLE = "There was an error processing your comment: {link}\n\n"
-ERROR_POSTAMBLE = ("You can edit your original comment and have it "
-                  "recompiled by replying to this message with the following: "
-                  "\n\n--recompile {link}")
+ERROR_PREAMBLE = TEXT['error_preamble']
+ERROR_POSTAMBLE = TEXT['error_postamble']
 HELP_TEXT = TEXT['help_text']
 LANG_ERROR_TEXT = TEXT['language_error_text']
 FORMAT_ERROR_TEXT = TEXT['format_error_text']

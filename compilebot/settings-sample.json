@@ -29,5 +29,7 @@
     "internal_error_text": "Internal Error\n\n",
     "recompile_error_text": "Recompile Error\n\n",
     "recompile_author_error_text": "Error recompiling. You can only request to recompile your own comments."
+    "error_preamble": "There was an error processing your comment: {link}\n\n",
+    "error_postamble": "You can edit your original comment and have it [recompiled](http://www.reddit.com/r/CompileBot/wiki/index#wiki_recompiling) by replying to this message with the following:\n\n--recompile {link}",
   }
 }
