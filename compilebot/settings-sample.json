@@ -16,7 +16,7 @@
     "C++": "C++11"
   },
   "text": {
-    "footer": "\n\n[^source]({ide_link}) ^| [^info](http://www.reddit.com/r/CompileBot/wiki) ^| [^github](https://github.com/renfredxh/compilebot) ^| [^report](http://www.reddit.com/message/compose?to=compilebot&subject=Report%20Abuse&message=--report%20{perm_link}%20Include%20your%20reason%20for%20reporting%20here.)",
+    "footer": "[^source]({ide_link}) ^| [^info](http://www.reddit.com/r/CompileBot/wiki) ^| [^git](https://github.com/renfredxh/compilebot) ^| [^report](http://www.reddit.com/message/compose?to=compilebot&subject=Report%20Abuse&message=--report%20{perm_link}%20Include%20your%20reason%20for%20reporting%20here.)",
     "help_text": "Help Text",
     "format_error_text": "Format Error\n\n",
     "language_error_text": "The language you requested (\"{lang}\"), was not found. Perhaps you meant one of the following: {choices}.\n\n"
