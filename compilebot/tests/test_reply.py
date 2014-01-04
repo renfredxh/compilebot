@@ -14,8 +14,8 @@ Run the following command from the parent directory in order to run only
 this test module: python -m unittest tests.test_reply
 """
 
-cb.USER_AGENT = "compilebot unit tests run by {}".format(cb.R_USERNAME)
-cb.LOG_FILE = "tests.log"
+LOG_FILE = "tests.log" 
+cb.LOG_FILE = LOG_FILE
 
 def reddit_id(length=6):
     """Emulate a reddit id with a random string of letters and digits"""
@@ -141,6 +141,7 @@ class TestCreateReply(unittest.TestCase):
         
     def tearDown(self):
         reload(cb)
+        cb.LOG_FILE = LOG_FILE
 
 class TestProcessUnread(unittest.TestCase):
     
@@ -322,6 +323,7 @@ class TestProcessUnread(unittest.TestCase):
         
     def tearDown(self):
         reload(cb)
+        cb.LOG_FILE = LOG_FILE
         
 class TestDetectSpam(unittest.TestCase):
     
