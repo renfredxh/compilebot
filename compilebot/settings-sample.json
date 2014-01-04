@@ -14,7 +14,15 @@
     "spam_phrases": ["rm","-rf"]
   },
   "lang_shortcuts": {
-    "C++": "C++11"
+    "C++": "C++11",
+    "Brainfuck": "Brainf**k",
+    "Lisp": "Common Lisp",
+    "Python3": "Python 3",
+    "Python 2.7": "Python",
+    "Python2.7": "Python",
+    "Java 7": "Java7",
+    "C99": "C99 strict",
+    "Node": "Node.js"
   },
   "text": {
     "footer": "[^source]({ide_link}) ^| [^info](http://www.reddit.com/r/CompileBot/wiki) ^| [^git](https://github.com/renfredxh/compilebot) ^| [^report](http://www.reddit.com/message/compose?to=compilebot&subject=Report%20Abuse&message=--report%20{perm_link}%20Include%20your%20reason%20for%20reporting%20here.)",
