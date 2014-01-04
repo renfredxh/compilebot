@@ -18,7 +18,7 @@ def main():
             except Exception as e:
                 bot.log("Error running bot.main: {error}".format(
                         error=e), alert=True)
-            bot.log("Round Finished. Sleeping for {time} 
+            bot.log("Round Finished. Sleeping for {time}" 
                     "seconds".format(time=SLEEP_TIME))
             time.sleep(SLEEP_TIME)
     except KeyboardInterrupt:
