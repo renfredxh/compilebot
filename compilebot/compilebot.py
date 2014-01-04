@@ -269,9 +269,7 @@ def create_reply(comment):
         preamble = ERROR_PREAMBLE.format(link=comment.permalink)
         postamble = ERROR_POSTAMBLE.format(link=comment.permalink)
         choices = ', '.join(e.similar_languages)
-        error_text = ("The language you requested (\"{lang}\"), was not "
-                       "found. Perhaps you meant one of the following: "
-                       "{choices}").format(lang=lang, choices=choices)
+        error_text = LANG_ERROR_TEXT.format(lang=lang, choices=choices)
         error_text = preamble + error_text + postamble
         # TODO Add link to accepted languages to msg
         log("Language error on comment {id}".format(id=comment.id))
@@ -395,8 +393,7 @@ def process_unread(new, r):
             else:
                 reply.send(new)
         else:
-            new.reply("Error recompiing. You can only request to "
-                      "recompile your own comments.")
+            new.reply(RECOMPILE_AUTHOR_ERROR_TEXT)
             log("Attempt to reompile on behalf of another author "
                 "detected. Request deined.")
     if reply and isinstance(reply, CompiledReply):
@@ -456,6 +453,7 @@ ERROR_POSTAMBLE = ("You can edit your original comment and have it "
                   "recompiled by replying to this message with the following: "
                   "\n\n--recompile {link}")
 HELP_TEXT = TEXT['help_text']
+LANG_ERROR_TEXT = TEXT['language_error_text']
 FORMAT_ERROR_TEXT = TEXT['format_error_text']
 COMPILE_ERROR_TEXT = TEXT['compile_error_text']
 RUNTIME_ERROR_TEXT = TEXT['runtime_error_text']
@@ -464,6 +462,7 @@ MEMORY_ERROR_TEXT = TEXT['memory_error_text']
 ILLEGAL_ERROR_TEXT = TEXT['illegal_error_text']
 INTERNAL_ERROR_TEXT =  TEXT['internal_error_text']
 RECOMPILE_ERROR_TEXT = TEXT['recompile_error_text']
+RECOMPILE_AUTHOR_ERROR_TEXT = TEXT['recompile_author_error_text']
 # Spam Settings
 LINE_LIMIT = SETTINGS["spam"]["line_limit"]
 CHAR_LIMIT = SETTINGS["spam"]["char_limit"]

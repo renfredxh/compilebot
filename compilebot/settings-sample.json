@@ -19,12 +19,14 @@
     "footer": "\n\n[^source]({ide_link}) ^| [^info](http://www.reddit.com/r/CompileBot/wiki) ^| [^github](https://github.com/renfredxh/compilebot) ^| [^report](http://www.reddit.com/message/compose?to=compilebot&subject=Report%20Abuse&message=--report%20{perm_link}%20Include%20your%20reason%20for%20reporting%20here.)",
     "help_text": "Help Text",
     "format_error_text": "Format Error\n\n",
+    "language_error_text": "The language you requested (\"{lang}\"), was not found. Perhaps you meant one of the following: {choices}.\n\n"
     "compile_error_text": "Compile Error\n\n",
     "runtime_error_text": "Runtime Error\n\n",
     "timeout_error_text": "Timeout Error\n\n",
     "memory_error_text": "Memory Error\n\n",
     "illegal_error_text": "Illegal Error\n\n",
     "internal_error_text": "Internal Error\n\n",
-    "recompile_error_text": "Recompile Error\n\n"
+    "recompile_error_text": "Recompile Error\n\n",
+    "recompile_author_error_text": "Error recompiling. You can only request to recompile your own comments."
   }
 }
