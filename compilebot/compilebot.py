@@ -426,7 +426,6 @@ def main():
             new.mark_as_read()
             
 # Settings
-LOG_FILE = '../compilebot.log'
 SETTINGS_FILE = 'settings.json'
 # Fetch settings from json file
 try:
@@ -434,6 +433,7 @@ try:
         SETTINGS = json.load(f)
 except (OSError, IOError) as e:
     print("Please configure settings.json")
+LOG_FILE = SETTINGS['log_file']
 # Login credentials
 I_USERNAME = SETTINGS['ideone_user']
 I_PASSWORD = SETTINGS['ideone_pass']

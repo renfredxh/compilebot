@@ -1,4 +1,5 @@
 {
+  "log_file": "compilebot.log",
   "reddit_user": "<your reddit username>",
   "reddit_pass":  "<your reddit password>",
   "ideone_user": "<your ideone username>",
