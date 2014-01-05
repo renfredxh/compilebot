@@ -58,7 +58,8 @@ class TestParseComment(unittest.TestCase):
     def test_errors(self):
         # Should raise an attribute error when there an indented code
         # block is missing.
-        body = "+/u/{user} Java\n\n Source code missing\n\n"
+        body = ("+/u/{user} Java\n\n Source code missing"
+                "\n\n".format(user=self.user))
         self.assertRaises(AttributeError, cb.parse_comment, (body))
 
 class TestCreateReply(unittest.TestCase):
@@ -239,7 +240,8 @@ class TestProcessUnread(unittest.TestCase):
             }
         
         cb.compile = compile
-        body = "+/u/CompileBot python 3\n\n    x = input()\n    print(x)\n\n"
+        body = ("+/u/{user} python 3\n\n    x = input()\n    print(x)"
+                "\n\n".format(user=self.user))
         new = self.Comment(body=body, reddit_session=self.r)
         cb.process_unread(new, self.r)
         self.assertTrue(new._replied_to)
@@ -270,7 +272,8 @@ class TestProcessUnread(unittest.TestCase):
         
         cb.compile = compile
         # Create the comment that will be recompiled.    
-        body = "+/u/CompileBot python 3\n\n    x = input()\n    print(x)\n\n"
+        body = ("+/u/{user} python 3\n\n    x = input()\n    print(x)"
+                "\n\n".format(user=self.user))
         original = self.Comment(body=body, reddit_session=self.r)
         self.r._get_sub_comment = original
         # Message that makes the recompile request.
@@ -294,7 +297,8 @@ class TestProcessUnread(unittest.TestCase):
             
         cb.compile = compile
         existing_reply = self.Comment(author=self.Author(self.user))
-        body = "+/u/CompileBot python 3\n\n    print(\"test\")\n\n"
+        body = ("+/u/{user} python 3\n\n    print(\"test\")\n\n"
+               "\n\n".format(user=self.user))
         
         replies = [existing_reply]
         original = self.Comment(body=body, reddit_session=self.r, 
