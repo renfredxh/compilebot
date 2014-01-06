@@ -1,6 +1,6 @@
 import time
 import traceback
-from urllib2 import HTTPError
+from requests import HTTPError
 import compilebot as bot
 
 SLEEP_TIME = 60
