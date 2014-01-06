@@ -64,7 +64,7 @@ class TestParseComment(unittest.TestCase):
 
 class TestCreateReply(unittest.TestCase):
     
-    # Simplified version of a PRAW comment for testing purposes
+    # Simplified version of a PRAW comment for testing purposes.
     class Comment(object):
         def __init__(self, body):
             self.body = body
@@ -116,7 +116,7 @@ class TestCreateReply(unittest.TestCase):
         
     def test_result_errors(self):
         # Test each error code and ensure the user will be alerted of
-        # errors via private message instead of in compiled replies
+        # errors via private message instead of in compiled replies.
         for error_code in [13, 17, 19, 20, 12]:
             def compile(*args, **kwargs):
                 return {
@@ -158,7 +158,7 @@ class TestProcessUnread(unittest.TestCase):
             self._message_subject = ''
             self._message_text = ''
             # Allows a custom comment to be assigned that is used to
-            # verify if get_submission is working correctly 
+            # verify if get_submission is working correctly.
             self._get_sub_comment = None
             
         def get_subreddit(*args, **kwargs):
@@ -370,5 +370,5 @@ class TestDetectSpam(unittest.TestCase):
         self.assertIn("Illegal system call detected", reply.detect_spam())
 
      
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(exit=False)

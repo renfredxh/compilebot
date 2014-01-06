@@ -49,5 +49,5 @@ class TestCompile(unittest.TestCase):
         self.assertDictContainsSubset(expected_details, details)
 
      
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(exit=False)

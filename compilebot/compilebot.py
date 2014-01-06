@@ -30,8 +30,8 @@ class CompiledReply(Reply):
     
     """Replies that contain details about evaluated code. These can be 
     sent as replies to comments.
-    
     """
+    
     def __init__(self, text, compile_details):
         Reply.__init__(self, text)
         self.compile_details = compile_details
@@ -45,8 +45,8 @@ class CompiledReply(Reply):
             comment.reply(self.text)
             log("Replied to {id}".format(id=comment.id))
         except praw.errors.RateLimitExceeded as e:
-            log('Rate Limit exceeded. '
-                'Sleeping for {time} seconds'.format(time=e.sleep_time))
+            log("Rate Limit exceeded. "
+                "Sleeping for {time} seconds".format(time=e.sleep_time))
             # Wait and try again.
             time.sleep(e.sleep_time)
             self.send(comment)
@@ -65,7 +65,7 @@ class CompiledReply(Reply):
     def detect_spam(self):
         """Scan a reply and return a list of potentially spammy attributes
         found in the comment's output.
-         """
+        """
         output = self.compile_details['output']
         source = self.compile_details['source']
         errors = self.compile_details['stderr']
@@ -101,7 +101,7 @@ class MessageReply(Reply):
         # If no custom subject line is given, the default will be a label
         # that identifies the comment.
         if not self.subject:
-            self.subject = "Comment {}".format(comment.id)
+            self.subject = "Comment {id}".format(id=comment.id)
         # Prepend message subject with username
         self.subject = "{} - {}".format(R_USERNAME, self.subject)
         r.send_message(self.recipient, self.subject, self.text)
@@ -161,8 +161,6 @@ def code_block(text):
     
 def get_banned(r):
     """Retrive list of banned users list from the moderator subreddit"""
-    # Banned users are taken from the moderator subreddit 
-    # banned users list
     banned = {user.name.lower() for user in 
                     r.get_subreddit(SUBREDDIT).get_banned()}
     return banned
@@ -172,11 +170,11 @@ def format_reply(details, opts):
     details along with optional additional information.
     """
     head, body, extra, = '', '', ''
-    # Combine information that will go before the output
+    # Combine information that will go before the output.
     if '--source' in opts:
         head += 'Source:\n{}\n\n'.format(code_block(details['source']))
     if '--input' in opts:
-    # Combine program output and runtime error output
+    # Combine program output and runtime error output.
         head += 'Input:\n{}\n\n'.format(code_block(details['input']))
     output = details['output'] + details['stderr']
     # Truncate the output if it contains an excessive 
@@ -191,7 +189,7 @@ def format_reply(details, opts):
     body += 'Output:\n{}\n\n'.format(code_block(output))
     if details['cmpinfo']:
         body += 'Compiler Info:\n{}\n\n'.format(code_block(details['cmpinfo']))
-    # Combine extra runtime information
+    # Combine extra runtime information.
     if '--date' in opts:
         extra += "Date: {}\n\n".format(details['date'])
     if '--memory' in opts:
@@ -234,7 +232,7 @@ def parse_comment(body):
     ) % R_USERNAME
     m = re.search(c_pattern, body)
     args, src, stdin = m.group('args'), m.group('src'), m.group('in') or ''
-    # Remove the leading four spaces from every line
+    # Remove the leading four spaces from every line.
     src = src.replace('\n    ', '\n')
     stdin = stdin.replace('\n    ', '\n')
     return args, src, stdin
@@ -253,8 +251,7 @@ def create_reply(comment):
         log("Formatting error on comment {c.id}: {c.body}".format(
             c=comment), alert=True)
         return MessageReply(error_text)
-    # Seperate the language name from the rest of the supplied options
-    # TODO seperate args and lang in a more robust way
+    # Seperate the language name from the rest of the supplied options.
     try:
         lang, opts = args.split(' -', 1)
         opts = ('-' + opts).split()
@@ -280,7 +277,7 @@ def create_reply(comment):
     # result is 15. Other codes indicate various errors.
     result_code = details['result'] 
     # The user is alerted of any errors via message reply unless they
-    # include an option to include errors in the reply
+    # include an option to include errors in the reply.
     if result_code == 15 or '--include-errors' in opts:
         text = format_reply(details, opts)
         ideone_link = "http://ideone.com/{}".format(details['link'])
@@ -299,7 +296,7 @@ def create_reply(comment):
             19: ILLEGAL_ERROR_TEXT,
             20: INTERNAL_ERROR_TEXT          
         }.get(result_code, '')
-        # Include any output from the submission in the reply
+        # Include any output from the submission in the reply.
         if details['cmpinfo']:
             error_text += "Compiler Output:\n\n{}\n\n".format(
                                 code_block(details['cmpinfo']))
@@ -326,7 +323,7 @@ def process_unread(new, r):
         log("Ignoring banned user {user}".format(user=sender))
         return
     # Search for a user mention preceded by a '+' which is the signal
-    # for CompileBot to create a reply for that comment
+    # for CompileBot to create a reply for that comment.
     if (new.was_comment and 
         re.search(r'(?i)\+/u/{}'.format(R_USERNAME), new.body)):
         reply = create_reply(new)
@@ -390,8 +387,10 @@ def process_unread(new, r):
                         reply.make_edit(rp, original)
                         break
                 else:
+                    # Reply to the original comment.
                     reply.send(original)
             else:
+                # Send a message reply.
                 reply.send(new)
         else:
             new.reply(RECOMPILE_AUTHOR_ERROR_TEXT)
@@ -412,7 +411,7 @@ def main():
         global BANNED_USERS
         BANNED_USERS = get_banned(r)
     # Iterate though each new comment/message in the inbox and
-    # process it appropriately
+    # process it appropriately.
     inbox = r.get_unread()
     for new in inbox:
         try:
@@ -467,5 +466,5 @@ LINE_LIMIT = SETTINGS["spam"]["line_limit"]
 CHAR_LIMIT = SETTINGS["spam"]["char_limit"]
 SPAM_PHRASES = SETTINGS["spam"]["spam_phrases"]
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
