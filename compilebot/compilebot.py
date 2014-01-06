@@ -122,8 +122,7 @@ def log(message, alert=False):
     if alert and ADMIN:
         r = praw.Reddit(USER_AGENT)
         r.login(R_USERNAME, R_PASSWORD)
-        # Indent text as markdown block for readability
-        admin_alert = code_block(message)
+        admin_alert = message
         subject = "CompileBot Alert"
         r.send_message(ADMIN, subject, admin_alert)
     
