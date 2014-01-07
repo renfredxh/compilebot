@@ -217,17 +217,19 @@ def parse_comment(body):
             (case insensitive).
         2. A string representing the programming language and arguments 
             + a "\n".
-        3. A markdown code block (one or more lines indented by 4 spaces)
-            that represents the source code + a "\n".
+        3. A markdown code block (one or more lines indented by 4 spaces or
+            a tab) that represents the source code + a "\n".
         4. (Optional) "Input:" OR "Stdin:" + "\n".
         5. (Optional) A markdown code block that represents the
             program's input.
     """
     c_pattern = (
         r'\+/u/(?i)%s\s*(?P<args>.*)\n\s*'
-        r'((?<=\n( {4}))|(?<=\n\t))(?P<src>.*(\n(( {4}|\t).*\n)*(( {4}|\t).*))?)'
+        r'((?<=\n( {4}))|(?<=\n\t))'
+        r'(?P<src>.*(\n((( {4}|\t).*\n)|\n)*(( {4}|\t).*))?)'
         r'(\n\s*((?i)Input|Stdin):?\s*\n\s*'
-        r'((?<=\n( {4}))|(?<=\n\t))(?P<in>.*(\n(( {4}|\t).*\n)*(( {4}|\t).*\n?))?))?'
+        r'((?<=\n( {4}))|(?<=\n\t))'
+        r'(?P<in>.*(\n((( {4}|\t).*\n)|\n)*(( {4}|\t).*\n?))?))?'
     ) % R_USERNAME
     m = re.search(c_pattern, body)
     args, src, stdin = m.group('args'), m.group('src'), m.group('in') or ''
