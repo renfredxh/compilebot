@@ -225,9 +225,9 @@ def parse_comment(body):
     """
     c_pattern = (
         r'\+/u/(?i)%s\s*(?P<args>.*)\n\s*'
-        r'(?<=\n {4})(?P<src>.*(\n( {4}.*\n)*( {4}.*))?)'
+        r'((?<=\n( {4}))|(?<=\n\t))(?P<src>.*(\n(( {4}|\t).*\n)*(( {4}|\t).*))?)'
         r'(\n\s*((?i)Input|Stdin):?\s*\n\s*'
-        r'(?<=\n {4})(?P<in>.*(\n( {4}.*\n)*( {4}.*\n?))?))?'
+        r'((?<=\n( {4}))|(?<=\n\t))(?P<in>.*(\n(( {4}|\t).*\n)*(( {4}|\t).*\n?))?))?'
     ) % R_USERNAME
     m = re.search(c_pattern, body)
     args, src, stdin = m.group('args'), m.group('src'), m.group('in') or ''
