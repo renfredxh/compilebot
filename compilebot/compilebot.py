@@ -178,9 +178,9 @@ def format_reply(details, opts):
     output = details['output'] + details['stderr']
     # Truncate the output if it contains an excessive 
     # amount of line breaks or if it is too long.
-    if output.count('\n') > 100:
+    if output.count('\n') > 50:
         lines = output.split('\n')
-        output = '\n'.join(lines[:101])
+        output = '\n'.join(lines[:51])
         output += "\n..."
     # Truncate the output if it is too long.
     if len(output) > 8000:
