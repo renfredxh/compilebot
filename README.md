@@ -16,7 +16,6 @@ CompileBot will then process your comment, execute it remotely, and then respond
 >     
 
 * You can view more information on how to use compilebot on the [compilebot wiki](http://www.reddit.com/r/CompileBot/wiki/index#wiki_how_to_use_compilebot). 
-* [See some examples of compile bot in action](http://www.reddit.com/user/CompileBot). 
 * [Try compilebot out on reddit](http://www.reddit.com/r/CompileBot/comments/1ueer5/official_compilebot_testing_thread/)
 
 # How it works
