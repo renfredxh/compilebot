@@ -340,7 +340,7 @@ def process_unread(new, r):
           re.match(r'(i?)\s*--report', new.body) and SUBREDDIT):
         sub = r.get_subreddit(SUBREDDIT)
         # Forward a report message to the moderators
-        r.send_message(sub, "Report from {author}",format(author=new.author),
+        r.send_message(sub, "Report from {author}".format(author=new.author),
                        new.body) 
         reply = MessageReply("Your message has been forwarded to the "
                              "moderators. Thank you.",
