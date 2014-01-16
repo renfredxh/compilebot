@@ -249,7 +249,7 @@ def create_reply(comment):
         preamble = ERROR_PREAMBLE.format(link=comment.permalink)
         postamble = ERROR_POSTAMBLE.format(link=comment.permalink)
         error_text = preamble + FORMAT_ERROR_TEXT + postamble
-        log("Formatting error on comment {c.id}: {c.body}".format(
+        log("Formatting error on comment {c.permalink}:\n\n{c.body}".format(
             c=comment), alert=True)
         return MessageReply(error_text)
     # Seperate the language name from the rest of the supplied options.
