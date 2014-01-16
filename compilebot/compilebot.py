@@ -164,6 +164,14 @@ def get_banned(r):
                     r.get_subreddit(SUBREDDIT).get_banned()}
     return banned
 
+def send_modmail(subject, body):
+    """Send a message to the bot moderators"""
+    if SUBREDDIT:
+        sub = r.get_subreddit(SUBREDDIT)
+        r.send_message(sub, subject, body)
+    else:
+        log("Mod message not sent. No subreddit found in settings.")
+    
 def format_reply(details, opts):
     """Returns a reply that contains the output from a ideone submission's 
     details along with optional additional information.
@@ -338,10 +346,9 @@ def process_unread(new, r):
         reply.send(new)
     elif ((not new.was_comment) and 
           re.match(r'(i?)\s*--report', new.body) and SUBREDDIT):
-        sub = r.get_subreddit(SUBREDDIT)
-        # Forward a report message to the moderators
-        r.send_message(sub, "Report from {author}".format(author=new.author),
-                       new.body) 
+        # Forward message to the moderators
+        send_modmail("Report from {author}".format(author=new.author),
+                     new.body)
         reply = MessageReply("Your message has been forwarded to the "
                              "moderators. Thank you.",
                              subject="CompileBot Report")
