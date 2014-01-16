@@ -410,7 +410,8 @@ def process_unread(new, r):
             text = ("Potential spam detected on comment {c.permalink} "
                     "by {c.author}: ".format(c=reply.parent_comment))
             text += ', '.join(spam)
-            log(text, alert=True)
+            send_modmail("Potential spam detected", text)
+            log(text)
         
 def main():
     r = praw.Reddit(USER_AGENT)
