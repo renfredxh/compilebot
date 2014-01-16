@@ -164,11 +164,11 @@ def get_banned(r):
                     r.get_subreddit(SUBREDDIT).get_banned()}
     return banned
 
-def send_modmail(subject, body):
+def send_modmail(subject, body, reddit):
     """Send a message to the bot moderators"""
     if SUBREDDIT:
-        sub = r.get_subreddit(SUBREDDIT)
-        r.send_message(sub, subject, body)
+        sub = reddit.get_subreddit(SUBREDDIT)
+        reddit.send_message(sub, subject, body)
     else:
         log("Mod message not sent. No subreddit found in settings.")
     
@@ -348,7 +348,7 @@ def process_unread(new, r):
           re.match(r'(i?)\s*--report', new.body) and SUBREDDIT):
         # Forward message to the moderators
         send_modmail("Report from {author}".format(author=new.author),
-                     new.body)
+                     new.body, r)
         reply = MessageReply("Your message has been forwarded to the "
                              "moderators. Thank you.",
                              subject="CompileBot Report")
@@ -410,7 +410,7 @@ def process_unread(new, r):
             text = ("Potential spam detected on comment {c.permalink} "
                     "by {c.author}: ".format(c=reply.parent_comment))
             text += ', '.join(spam)
-            send_modmail("Potential spam detected", text)
+            send_modmail("Potential spam detected", text, r)
             log(text)
         
 def main():
