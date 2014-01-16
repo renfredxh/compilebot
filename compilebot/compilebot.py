@@ -158,10 +158,10 @@ def code_block(text):
     """Create a markdown formatted code block containing the given text"""
     return ('\n' + text).replace('\n', '\n    ')
     
-def get_banned(r):
+def get_banned(reddit):
     """Retrive list of banned users list from the moderator subreddit"""
     banned = {user.name.lower() for user in 
-                    r.get_subreddit(SUBREDDIT).get_banned()}
+                reddit.get_subreddit(SUBREDDIT).get_banned()}
     return banned
 
 def send_modmail(subject, body, reddit):
