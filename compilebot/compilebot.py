@@ -200,7 +200,7 @@ def format_reply(details, opts):
     if '--date' in opts:
         extra += "Date: {}\n\n".format(details['date'])
     if '--memory' in opts:
-        extra += "Memory Usage: {}\n\n".format(details['memory'])
+        extra += "Memory Usage: {} bytes\n\n".format(details['memory'])
     if '--time' in opts:
         extra += "Execution Time: {} seconds\n\n".format(details['time'])
     if '--version' in opts:
