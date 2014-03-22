@@ -160,7 +160,7 @@ def code_block(text):
     
 def get_banned(reddit):
     """Retrive list of banned users list from the moderator subreddit"""
-    banned = {user.name.lower() for user in 
+    banned = {user.lower() for user in 
                 reddit.get_subreddit(SUBREDDIT).get_banned()}
     return banned
 
