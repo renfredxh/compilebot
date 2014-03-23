@@ -186,7 +186,7 @@ def format_reply(details, opts):
     output = details['output'] + details['stderr']
     # Truncate the output if it contains an excessive
     # amount of line breaks or if it is too long.
-    if output.count('\n') > 50:
+    if output.count('\n') > LINE_LIMIT:
         lines = output.split('\n')
         # If message contains an excessive amount of duplicate lines,
         # truncate to a small amount of lines to discourage spamming
