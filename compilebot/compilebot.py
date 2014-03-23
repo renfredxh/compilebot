@@ -188,7 +188,13 @@ def format_reply(details, opts):
     # amount of line breaks or if it is too long.
     if output.count('\n') > 50:
         lines = output.split('\n')
-        output = '\n'.join(lines[:51])
+        # If message contains an excessive amount of duplicate lines,
+        # truncate to a small amount of lines to discourage spamming
+        if len(set(lines)) < 5:
+            lines_allowed = 2
+        else:
+            lines_allowed = 51
+        output = '\n'.join(lines[:lines_allowed])
         output += "\n..."
     # Truncate the output if it is too long.
     if len(output) > 8000:
