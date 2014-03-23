@@ -8,35 +8,35 @@ import urllib
 import traceback
 
 class Reply(object):
-    
+
     """An object that represents a potential response to a comment.
-    
+
     Replies are not tied to a specific recipient on at their inception,
     however once sent the recipient should be recorded.
     """
-    
+
     def __init__(self, text):
         # Truncate text if it exceeds max character limit.
         if len(text) >= 10000:
             text = text[:9995] + '\n...'
         self.text = text
         self.recipient = None
-    
+
     def send(self, *args, **kwargs):
         """An abstract method that sends the reply."""
         raise NotImplementedError
-            
+
 class CompiledReply(Reply):
-    
-    """Replies that contain details about evaluated code. These can be 
+
+    """Replies that contain details about evaluated code. These can be
     sent as replies to comments.
     """
-    
+
     def __init__(self, text, compile_details):
         Reply.__init__(self, text)
         self.compile_details = compile_details
         self.parent_comment = None
-        
+
     def send(self, comment):
         """Send a reply to a specific reddit comment or message."""
         self.parent_comment = comment
@@ -54,14 +54,14 @@ class CompiledReply(Reply):
         except praw.errors.APIException as e:
             log("Exception on comment {id}, {error}".format(
                 id=comment.id, error=e))
-                
+
     def make_edit(self, comment, parent):
         """Edit one of the bot's existing comments."""
         self.parent_comment = parent
         self.recipient = parent.author
         comment.edit(self.text)
         log("Edited comment {}".format(comment.id))
-        
+
     def detect_spam(self):
         """Scan a reply and return a list of potentially spammy attributes
         found in the comment's output.
@@ -69,7 +69,7 @@ class CompiledReply(Reply):
         output = self.compile_details['output']
         source = self.compile_details['source']
         errors = self.compile_details['stderr']
-    
+
         spam_behaviors = {
             "Excessive line breaks": output.count('\n') > LINE_LIMIT,
             "Excessive character count": len(output) > CHAR_LIMIT,
@@ -85,9 +85,9 @@ class CompiledReply(Reply):
 class MessageReply(Reply):
 
     """Replies that contain information that may be sent to a reddit user
-    via private message. 
+    via private message.
     """
-    
+
     def __init__(self, text, subject=''):
         Reply.__init__(self, text)
         self.subject = subject
@@ -125,21 +125,21 @@ def log(message, alert=False):
         admin_alert = message
         subject = "CompileBot Alert"
         r.send_message(ADMIN, subject, admin_alert)
-    
+
 def compile(source, lang, stdin=''):
     """Compile and evaluate source sode using the ideone API and return
     a dict containing the output details.
-    
+
     Keyword arguments:
     source -- a string containing source code to be compiled and evaluated
     lang -- the programming language pertaining to the source code
     stdin -- optional "standard input" for the program
-    
+
     >>> d = compile('print("Hello World")', 'python')
     >>> d['output']
     Hello World
 
-    """ 
+    """
     lang = LANG_SHORTCUTS.get(lang.lower(), lang)
     # Login to ideone and create a submission
     i = ideone.Ideone(I_USERNAME, I_PASSWORD)
@@ -157,10 +157,10 @@ def compile(source, lang, stdin=''):
 def code_block(text):
     """Create a markdown formatted code block containing the given text"""
     return ('\n' + text).replace('\n', '\n    ')
-    
+
 def get_banned(reddit):
     """Retrive list of banned users list from the moderator subreddit"""
-    banned = {user.name.lower() for user in 
+    banned = {user.name.lower() for user in
                 reddit.get_subreddit(SUBREDDIT).get_banned()}
     return banned
 
@@ -171,9 +171,9 @@ def send_modmail(subject, body, reddit):
         reddit.send_message(sub, subject, body)
     else:
         log("Mod message not sent. No subreddit found in settings.")
-    
+
 def format_reply(details, opts):
-    """Returns a reply that contains the output from a ideone submission's 
+    """Returns a reply that contains the output from a ideone submission's
     details along with optional additional information.
     """
     head, body, extra, = '', '', ''
@@ -184,7 +184,7 @@ def format_reply(details, opts):
     # Combine program output and runtime error output.
         head += 'Input:\n{}\n\n'.format(code_block(details['input']))
     output = details['output'] + details['stderr']
-    # Truncate the output if it contains an excessive 
+    # Truncate the output if it contains an excessive
     # amount of line breaks or if it is too long.
     if output.count('\n') > 50:
         lines = output.split('\n')
@@ -219,11 +219,11 @@ def format_reply(details, opts):
 def parse_comment(body):
     """Parse a string that contains a username mention and code block
     and return the supplied arguments, source code and input.
-    
+
     c_pattern is a regular expression that searches for the following:
-        1. "+/u/" + the reddit username that is using the program 
+        1. "+/u/" + the reddit username that is using the program
             (case insensitive).
-        2. A string representing the programming language and arguments 
+        2. A string representing the programming language and arguments
             + a "\n".
         3. A markdown code block (one or more lines indented by 4 spaces or
             a tab) that represents the source code + a "\n".
@@ -245,12 +245,12 @@ def parse_comment(body):
     src = src.replace('\n    ', '\n')
     stdin = stdin.replace('\n    ', '\n')
     return args, src, stdin
-    
+
 def create_reply(comment):
     """Search comments for username mentions followed by code blocks
     and return a formatted reply containing the output of the executed
     block or a message with additional information.
-    """  
+    """
     try:
         args, src, stdin = parse_comment(comment.body)
     except AttributeError:
@@ -282,15 +282,15 @@ def create_reply(comment):
         log("Language error on comment {id}".format(id=comment.id))
         return MessageReply(error_text)
     # The ideone submission result value indicaties the final state of
-    # the program. If the program compiled and ran successfully the 
+    # the program. If the program compiled and ran successfully the
     # result is 15. Other codes indicate various errors.
-    result_code = details['result'] 
+    result_code = details['result']
     # The user is alerted of any errors via message reply unless they
     # include an option to include errors in the reply.
     if result_code == 15 or '--include-errors' in opts:
         text = format_reply(details, opts)
         ideone_link = "http://ideone.com/{}".format(details['link'])
-        url_pl = urllib.quote(comment.permalink) 
+        url_pl = urllib.quote(comment.permalink)
         text += FOOTER.format(ide_link=ideone_link, perm_link=url_pl)
     else:
         log("Result error {code} detected in comment {id}".format(
@@ -303,7 +303,7 @@ def create_reply(comment):
             13: TIMEOUT_ERROR_TEXT,
             17: MEMORY_ERROR_TEXT,
             19: ILLEGAL_ERROR_TEXT,
-            20: INTERNAL_ERROR_TEXT          
+            20: INTERNAL_ERROR_TEXT
         }.get(result_code, '')
         # Include any output from the submission in the reply.
         if details['cmpinfo']:
@@ -311,16 +311,16 @@ def create_reply(comment):
                                 code_block(details['cmpinfo']))
         if details['output']:
             error_text += "Output:\n\n{}\n\n".format(
-                    code_block(details['cmpinfo']))                
+                    code_block(details['cmpinfo']))
         if details['stderr']:
             error_text += "Error Output:\n\n{}\n\n".format(
                                 code_block(details['stderr']))
         error_text = preamble + error_text + postamble
         return MessageReply(error_text)
     return CompiledReply(text, details)
-    
+
 def process_unread(new, r):
-    """Parse a new comment or message for various options and ignore reply 
+    """Parse a new comment or message for various options and ignore reply
     to as appropriate.
     """
     reply = None
@@ -333,18 +333,18 @@ def process_unread(new, r):
         return
     # Search for a user mention preceded by a '+' which is the signal
     # for CompileBot to create a reply for that comment.
-    if (new.was_comment and 
+    if (new.was_comment and
         re.search(r'(?i)\+/u/{}'.format(R_USERNAME), new.body)):
         reply = create_reply(new)
-        if reply: 
+        if reply:
             reply.send(new)
-    elif ((not new.was_comment) and 
+    elif ((not new.was_comment) and
           re.match(r'(i?)\s*--help', new.body)):
         # Message a user the help text if comment is a message
         # containing "--help".
         reply = MessageReply(HELP_TEXT, subject='CompileBot Help')
         reply.send(new)
-    elif ((not new.was_comment) and 
+    elif ((not new.was_comment) and
           re.match(r'(i?)\s*--report', new.body) and SUBREDDIT):
         # Forward message to the moderators
         send_modmail("Report from {author}".format(author=new.author),
@@ -353,7 +353,7 @@ def process_unread(new, r):
                              "moderators. Thank you.",
                              subject="CompileBot Report")
         reply.send(new)
-    elif ((not new.was_comment) and 
+    elif ((not new.was_comment) and
           re.match(r'(i?)\s*--recompile', new.body)):
         # Search for the recompile command followed by a comment id.
         # Example: 1tt4jt/post_title/ceb7czt
@@ -375,14 +375,14 @@ def process_unread(new, r):
         # Ensure the author of the original comment matches the author
         # requesting the recompile to prevent one user sending a recompile
         # request on the behalf of another.
-        if original.author == new.author:                  
+        if original.author == new.author:
             reply = create_reply(original)
             # Ensure the recompiled reply resulted in a valid comment
             # reply and not an error message reply.
             if isinstance(reply, CompiledReply):
                 # Search for an existing comment reply from the bot.
                 # If one is found, edit the existing comment instead
-                # of creating a new one. 
+                # of creating a new one.
                 #
                 # Note: the .replies property only returns a limited
                 # number of comments. If the reply is buried, it will
@@ -412,7 +412,7 @@ def process_unread(new, r):
             text += ', '.join(spam)
             send_modmail("Potential spam detected", text, r)
             log(text)
-        
+
 def main():
     r = praw.Reddit(USER_AGENT)
     r.login(R_USERNAME, R_PASSWORD)
@@ -432,7 +432,7 @@ def main():
                 "{traceback}".format(c=new, traceback=tb), alert=True)
         finally:
             new.mark_as_read()
-            
+
 # Settings
 SETTINGS_FILE = 'settings.json'
 # Fetch settings from json file
