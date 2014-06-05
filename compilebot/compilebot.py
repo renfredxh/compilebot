@@ -156,7 +156,9 @@ def compile(source, lang, stdin=''):
 
 def code_block(text):
     """Create a markdown formatted code block containing the given text"""
-    return ('\n' + text).replace('\n', '\n    ')
+    for char in ['\n', '\r']:
+        text = text.replace(char, '\n    ')
+    return '\n' + text
 
 def get_banned(reddit):
     """Retrive list of banned users list from the moderator subreddit"""
