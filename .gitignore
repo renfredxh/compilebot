@@ -1,3 +1,4 @@
 *.py[co]
-.log
+*.log
 venv/
+settings.json
