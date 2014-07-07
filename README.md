@@ -46,10 +46,10 @@ cd lib/ideone-api/
 python setup.py install
 ```
 
-Install praw:
+Install the dependencies:
 
 ```bash
-pip install praw
+pip install -r requirements.txt
 ```
 
 Now that all of the dependencies for compilebot have been installed, you'll have to configure the settings file. You can copy the included sample settings into a new file. From the main directory:
