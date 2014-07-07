@@ -52,7 +52,7 @@ class CompiledReply(Reply):
             # Wait and try again.
             time.sleep(e.sleep_time)
             self.send(comment)
-        except HTTPError as e:
+        except praw.requests.HTTPError as e:
             log("HTTPError on comment {id}, {error}".format(
                 id=comment.id, error=e))
             # Handle HTTP 403 "Forbidden" errors.
