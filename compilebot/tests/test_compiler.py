@@ -21,8 +21,8 @@ def test_suite():
         unittest.TestLoader().loadTestsFromTestCase(case) for case in cases
     ]
     return unittest.TestSuite(alltests)
-    
-    
+
+
 class TestCompile(unittest.TestCase):
 
 
@@ -48,6 +48,6 @@ class TestCompile(unittest.TestCase):
         self.assertTrue(details['link'])
         self.assertDictContainsSubset(expected_details, details)
 
-     
+
 if __name__ == "__main__":
     unittest.main(exit=False)

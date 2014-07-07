@@ -2,7 +2,7 @@
 # Run this file from the parent directory with the following command:
 # python -m tests.run_all
 from tests import *
-import unittest    
+import unittest
 
 def main():
     test_suites = [
