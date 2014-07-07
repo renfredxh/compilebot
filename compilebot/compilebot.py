@@ -36,11 +36,13 @@ class CompiledReply(Reply):
         Reply.__init__(self, text)
         self.compile_details = compile_details
         self.parent_comment = None
+        self.send_attempts = 0
 
     def send(self, comment):
         """Send a reply to a specific reddit comment or message."""
         self.parent_comment = comment
         self.recipient = comment.author
+        self.send_attempts += 1
         try:
             comment.reply(self.text)
             log("Replied to {id}".format(id=comment.id))
@@ -50,6 +52,18 @@ class CompiledReply(Reply):
             # Wait and try again.
             time.sleep(e.sleep_time)
             self.send(comment)
+        except HTTPError as e:
+            log("HTTPError on comment {id}, {error}".format(
+                id=comment.id, error=e))
+            # Handle HTTP 403 "Forbidden" errors.
+            if '403' in e:
+                return
+            elif self.send_attempts < 3:
+                log("HTTP Error encountered. "
+                    "Sleeping for {time} seconds".format(time=e.sleep_time))
+                sleep_time = self.send_attempts * 150
+                time.sleep(e.sleep_time)
+                self.send()
         # Handle and log miscellaneous API exceptions
         except praw.errors.APIException as e:
             log("Exception on comment {id}, {error}".format(
