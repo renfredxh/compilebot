@@ -6,6 +6,7 @@ import yaml
 import re
 import urllib
 import traceback
+from sys import exit
 
 class Reply(object):
 
@@ -464,6 +465,7 @@ try:
         SETTINGS = yaml.load(f)
 except (OSError, IOError) as e:
     print("Please configure config.yml")
+    exit(1)
 LOG_FILE = SETTINGS['log_file']
 # Login credentials
 I_USERNAME = SETTINGS['ideone_user']
