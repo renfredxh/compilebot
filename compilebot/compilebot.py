@@ -2,8 +2,8 @@ from __future__ import unicode_literals, print_function
 import ideone
 import time
 import praw
+import yaml
 import re
-import json
 import urllib
 import traceback
 
@@ -457,13 +457,13 @@ def main():
             new.mark_as_read()
 
 # Settings
-SETTINGS_FILE = 'settings.json'
+SETTINGS_FILE = 'config.yml'
 # Fetch settings from json file
 try:
     with open(SETTINGS_FILE, 'r') as f:
-        SETTINGS = json.load(f)
+        SETTINGS = yaml.load(f)
 except (OSError, IOError) as e:
-    print("Please configure settings.json")
+    print("Please configure config.yml")
 LOG_FILE = SETTINGS['log_file']
 # Login credentials
 I_USERNAME = SETTINGS['ideone_user']

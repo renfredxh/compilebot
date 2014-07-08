@@ -1,0 +1,102 @@
+---
+  reddit_user: # Your reddit user name
+  reddit_pass: # Your reddit password
+  ideone_user: # Your ideone username
+  ideone_pass: # Your ideone password
+  admin_user: # User log messages are sent to
+  log_file: # Optional file for storing log messages
+  user_agent: >
+      Code compilation bot dev testing by # Your reddit username
+  # Moderation subreddit for fetching banned users
+  subreddit: CompileBot
+  spam:
+    line_limit: 200
+    char_limit: 4000
+    spam_phrases:
+      - "rm "
+      - "-rf"
+      - "bitcontip"
+  # Optional aliases for languages
+  lang_shortcuts:
+    C++: C++11
+    Brainfuck: Brainf**k
+    Lisp: Common Lisp
+    Python3: Python 3
+    Python 2.7: Python
+    Python2.7: Python
+    Java 7: Java7
+    C99: C99 strict
+    Node: Node.js
+  text:
+    footer: |
+        [^source]({ide_link}) ^|
+        [^info](http://www.reddit.com/r/CompileBot/wiki) ^|
+        [^git](https://github.com/renfredxh/compilebot) ^|
+        [^report](http://www.reddit.com/message/compose?to=compilebot&subject=Report%20Abuse&message=--report%20{perm_link}%20Include%20your%20reason%20for%20reporting%20here.)
+    help_text: |
+        CompileBot is a reddit bot that can execute source code in comments. All you have to do is mention CompileBot in your comments along with a language and source code:
+
+        > +/u/CompileBot python
+        >
+        >     print "Hello World!"
+
+        CompileBot will then process your comment, execute it remotely, and then respond with the output:
+
+        > Output:
+        >
+        >     Hello World!
+        >
+
+        You can find out more about how to use compile bot, why it exists, the languages it supports and its source code all from the the [CompileBot Wiki]
+        (http://www.reddit.com/r/CompileBot/wiki/)
+    error_preamble: |
+        There was an error processing your comment: {link}
+    error_postamble: |
+        You can edit your original comment and have it [recompiled]
+        (http://www.reddit.com/r/CompileBot/wiki/index#wiki_recompiling)
+        by replying to this message with the following:
+
+        --recompile {link}
+    format_error_text: |
+        There was an error formatting your comment.
+        Refer to the [formatting guide]
+        (http://www.reddit.com/r/CompileBot/wiki/index#wiki_how_to_use_compilebot)
+        to ensure your comment was formatted correctly.
+
+        If you believe your comment was correctly formatted, you can report this incident to the admins by replying to this message with the text "--report" followed by the permalink to the comment in question.
+    language_error_text: |
+        The language you requested ("{lang}"), was not found.
+        Perhaps you meant one of the following: {choices}.
+
+        A list of supported languages is available on the
+        [CompileBot Wiki]
+        (http://www.reddit.com/r/CompileBot/wiki/supported_languages)
+    compile_error_text: |
+        An error occurred during the compilation of the included source code.
+
+        If you would like the output of these errors to be included in a reply to your comment, you can include the "**--include-errors**" [option]
+        (http://www.reddit.com/r/CompileBot/wiki/index#wiki_options)
+        when creating your request.
+    runtime_error_text: |
+        An error occurred during the execution of the included source code.
+        If you would like the output of these errors to be included in a reply to your comment, you can include the "**--include-errors**" [option]
+        (http://www.reddit.com/r/CompileBot/wiki/index#wiki_options)
+        when creating your request.
+    timeout_error_text: |
+        Your program took too long to run.
+        Programs are only allowed to compile for a maximum of 10 seconds and run for a maximum of 5 seconds.
+    memory_error_text: |
+        Your program used too much memory.
+        Programs are only allowed to use up to 256 MB of memory.
+    illegal_error_text: |
+        Your program attempted to use a restricted system function.
+    internal_error_text: |
+        There an internal error has occoured ideone's compilation servers.
+        Please wait an try again.
+    recompile_error_text: |
+        There was an error processing you recompilation request.
+        Make sure your message contains "--recompile" followed by a valid comment permalink. [View more details on recompiling here]
+        (http://www.reddit.com/r/CompileBot/wiki/index#wiki_recompiling).
+    recompile_author_error_text: |
+        You can only request to recompile your own comments.
+

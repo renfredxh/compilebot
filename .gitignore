@@ -1,4 +1,4 @@
 *.py[co]
 *.log
 venv/
-settings.json
+config.yml

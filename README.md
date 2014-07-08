@@ -56,7 +56,7 @@ Now that all of the dependencies for compilebot have been installed, you'll have
 
 ```bash
 cd compilebot
-cp settings-sample.json settings.json
+cp sample-config.yml config.yml
 ```
 
 Now, if you open `settings.json` in your favorite text editor you'll see customizable data for compilebot to use. If you would like to run all of compilebot's features, you'll need a [reddit](http://www.reddit.com/) account and a [ideone](http://ideone.com/account/register) account. Once you have your login credentials, you can edit `settings.json` and fill in the following fields:
