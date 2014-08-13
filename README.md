@@ -4,19 +4,19 @@ compilebot
 CompileBot is a reddit bot that can execute source code in comments. All you have to do is mention CompileBot in your comments along with a language and source code:
 
 > +[/u/CompileBot](http://www.reddit.com/user/CompileBot) python
-> 
+>
 >     print "Hello World!"
-> 
+>
 
 CompileBot will then process your comment, execute it remotely, and then respond with the output:
 
 > Output:
-> 
+>
 >     Hello World!
->     
+>
 
-* You can view more information on how to use compilebot on the [compilebot wiki](http://www.reddit.com/r/CompileBot/wiki/index#wiki_how_to_use_compilebot). 
-* [Try compilebot out on reddit](http://www.reddit.com/r/CompileBot/comments/1ueer5/official_compilebot_testing_thread/)
+* You can view more information on how to use compilebot on the [compilebot wiki](http://www.reddit.com/r/CompileBot/wiki/index#wiki_how_to_use_compilebot).
+* [Try compilebot out on reddit](http://www.reddit.com/r/CompileBot/comments/2a3ust/official_compilebot_testing_thread/)
 
 # How it works
 
@@ -59,13 +59,13 @@ cd compilebot
 cp sample-config.yml config.yml
 ```
 
-Now, if you open `settings.json` in your favorite text editor you'll see customizable data for compilebot to use. If you would like to run all of compilebot's features, you'll need a [reddit](http://www.reddit.com/) account and a [ideone](http://ideone.com/account/register) account. Once you have your login credentials, you can edit `settings.json` and fill in the following fields:
+Now, if you open `config.yml` in your favorite text editor you'll see customizable data for compilebot to use. If you would like to run all of compilebot's features, you'll need a [reddit](http://www.reddit.com/) account and a [ideone](http://ideone.com/account/register) account. Once you have your login credentials, you can edit `config.yml` and fill in the following fields:
 
-```json
-  "reddit_user": "<your reddit username>",
-  "reddit_pass":  "<your reddit password>",
-  "ideone_user": "<your ideone username>",
-  "ideone_pass": "<your ideone password>",
+```yaml
+  reddit_user: # Your reddit user name
+  reddit_pass: # Your reddit password
+  ideone_user: # Your ideone username
+  ideone_pass: # Your ideone password
 ```
 
 Finally, try running compilebot:
