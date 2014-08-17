@@ -218,6 +218,8 @@ class TestProcessUnread(unittest.TestCase):
 
     def setUp(self):
         self.r = self.Reddit()
+        if cb.R_USERNAME is None:
+            cb.R_USERNAME = 'TestUser'
         self.user = cb.R_USERNAME
 
     def test_process_reply(self):
