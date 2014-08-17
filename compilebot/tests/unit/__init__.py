@@ -1,2 +1,2 @@
-__all__ = ['reply']
+__all__ = ['reply', 'praw']
 

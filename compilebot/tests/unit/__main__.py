@@ -12,6 +12,7 @@ def main():
     print("Running CompileBot unit tests")
     test_suites = [
         reply.test_suite(),
+        praw.test_suite(),
     ]
     all_tests = unittest.TestSuite(test_suites)
     unittest.TextTestRunner().run(all_tests)
