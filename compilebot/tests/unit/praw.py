@@ -18,8 +18,8 @@ cb.LOG_FILE = helpers.LOG_FILE
 
 def test_suite():
     cases = [
-        TestHandlePrawExceptions, TestSendModMail, TestGetBanned, 
-        TestSendAdminMessage
+        TestHandlePrawExceptions, TestSendModMail, TestGetBanned,
+        TestSendAdminMessage, TestMain
     ]
     alltests = [
         unittest.TestLoader().loadTestsFromTestCase(case) for case in cases
@@ -123,6 +123,22 @@ class TestSendAdminMessage(unittest.TestCase):
         args, kwargs = r.send_message.call_args
         self.assertTrue(body in args[2])
         r.send_message.assert_called_once_with('AdminUser', args[1], args[2])
+
+class TestMain(unittest.TestCase):
+
+    @patch('{}.cb.process_unread'.format(__name__))
+    @patch('{}.cb.praw.Reddit'.format(__name__))
+    def test_main(self, mock_reddit, mock_process_unread):
+        r = mock_reddit.return_value
+        cb.R_USERNAME = 'TestUser'
+        cb.R_PASSWORD = 'hunter2'
+        mock_inbox = [Mock(), Mock(), Mock()]
+        r.get_unread.return_value = mock_inbox
+        cb.main()
+        r.login.assert_called_with('TestUser', 'hunter2')
+        for new in mock_inbox:
+            mock_process_unread.asset_any_call(new, r)
+            new.mark_as_read.assert_called_with()
 
 if __name__ == "__main__":
     unittest.main(exit=False)
