@@ -76,16 +76,22 @@ python compilebot.py
 
 # Testing
 
+[![Build Status](https://travis-ci.org/renfredxh/compilebot.svg?branch=master)](https://travis-ci.org/renfredxh/compilebot)
+
 If you would like to test any changes, you can run the compilebot test suite in order to test each function. From the directory that contains compilebot.py, you can run all of the test modules:
 
 ```bash
-python -m tests.run_all
+python -m tests.all
 ```
 
-The reply functions module tests a good amount of the compilebot functions and does not require any login requests. If you're only would like to run the reply functions:
+Or just the unit tests:
 
 ```bash
-python -m tests.test_reply
+python -m tests.unit
 ```
 
-Disclaimer: the tests cases may not be perfect. The tests are written in a mostly white-box style and there is room for improvement. If you think a test is incorrect or would like to contribute improvements, please feel free to.
+Or a single test module:
+
+```bash
+python -m tests.unit.reply
+```
