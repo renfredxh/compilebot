@@ -84,7 +84,7 @@ class TestHandlePrawExceptions(unittest.TestCase):
 
 class TestSendModMail(unittest.TestCase):
 
-    @patch('{}.cb.praw.Reddit'.format(__name__))
+    @patch('{}.cb.praw.Reddit'.format(__name__), autospec=True)
     def test_send_modmail(self, mock_reddit):
         subreddit, subject, body = 'MySub', 'Test Subject', 'Hello'
         r = mock_reddit.return_value
@@ -98,7 +98,7 @@ class TestSendModMail(unittest.TestCase):
 
 class TestGetBanned(unittest.TestCase):
 
-    @patch('{}.cb.praw.Reddit'.format(__name__))
+    @patch('{}.cb.praw.Reddit'.format(__name__), autospec=True)
     def test_get_banned(self, mock_reddit):
         r = mock_reddit.return_value
         subreddit = 'MySub'
@@ -114,7 +114,7 @@ class TestGetBanned(unittest.TestCase):
 
 class TestSendAdminMessage(unittest.TestCase):
 
-    @patch('{}.cb.praw.Reddit'.format(__name__))
+    @patch('{}.cb.praw.Reddit'.format(__name__), autospec=True)
     def test_send_admin_message(self, mock_reddit):
         r = mock_reddit.return_value
         cb.ADMIN = 'AdminUser'
@@ -126,8 +126,8 @@ class TestSendAdminMessage(unittest.TestCase):
 
 class TestMain(unittest.TestCase):
 
-    @patch('{}.cb.process_unread'.format(__name__))
-    @patch('{}.cb.praw.Reddit'.format(__name__))
+    @patch('{}.cb.process_unread'.format(__name__), autospec=True)
+    @patch('{}.cb.praw.Reddit'.format(__name__), autospec=True)
     def test_main(self, mock_reddit, mock_process_unread):
         r = mock_reddit.return_value
         cb.R_USERNAME = 'TestUser'
@@ -137,7 +137,7 @@ class TestMain(unittest.TestCase):
         cb.main()
         r.login.assert_called_with('TestUser', 'hunter2')
         for new in mock_inbox:
-            mock_process_unread.asset_any_call(new, r)
+            mock_process_unread.assert_any_call(new, r)
             new.mark_as_read.assert_called_with()
 
 if __name__ == "__main__":

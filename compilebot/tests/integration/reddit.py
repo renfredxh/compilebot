@@ -29,8 +29,9 @@ def test_suite():
 class TestRedditIntegration(unittest.TestCase):
 
     @patch('{}.cb.time.sleep'.format(__name__))
-    @patch('{}.cb.praw.objects.Subreddit.get_banned'.format(__name__))
-    @patch('{}.cb.compile'.format(__name__))
+    @patch('{}.cb.praw.objects.Subreddit.get_banned'.format(__name__),
+           autospec=True)
+    @patch('{}.cb.compile'.format(__name__), autospec=True)
     def test_compile_request(self, mock_compile, mock_get_banned, mock_sleep):
         test_comment_id = cb.CONFIG['tests']['integration']['reddit']['test_comment']
         accepted_substring = cb.CONFIG['tests']['integration']['reddit']['accepted_substring']
