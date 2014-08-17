@@ -68,6 +68,14 @@ class TestCreateReply(unittest.TestCase):
     def setUp(self):
         self.user = cb.R_USERNAME
 
+    def test_code_block(self):
+        unsafe_text = "\nHello\nWorld"
+        self.assertEqual(cb.code_block(unsafe_text),
+            "\n    \n    Hello\n    World")
+        unsafe_text = "\tHello\rCarriage\n\r Return"
+        self.assertEqual(cb.code_block(unsafe_text),
+            "\n    \tHello\n    Carriage\n    \n     Return")
+
     def test_create_reply(self):
         with patch('{}.cb.compile'.format(__name__)) as mock_compile:
             mock_compile.return_value = {
