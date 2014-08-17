@@ -194,12 +194,14 @@ def code_block(text):
         text = text.replace(char, '\n    ')
     return text
 
+@handle_praw_exceptions()
 def get_banned(reddit):
     """Retrive list of banned users list from the moderator subreddit"""
     banned = {user.name.lower() for user in
                 reddit.get_subreddit(SUBREDDIT).get_banned()}
     return banned
 
+@handle_praw_exceptions()
 def send_modmail(subject, body, reddit):
     """Send a message to the bot moderators"""
     if SUBREDDIT:
@@ -456,6 +458,7 @@ def process_unread(new, r):
             send_modmail("Potential spam detected", text, r)
             log(text)
 
+@handle_praw_exceptions()
 def main():
     r = praw.Reddit(USER_AGENT)
     r.login(R_USERNAME, R_PASSWORD)
