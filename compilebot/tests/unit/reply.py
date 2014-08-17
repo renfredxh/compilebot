@@ -271,15 +271,18 @@ class TestProcessUnread(unittest.TestCase):
         self.assertTrue(original._replied_to)
 
     def test_recompile_edit(self):
-        # Ensure that if there is an existing reply from a bot on a
-        # comment that is being recompiled, the existing reply is
-        # editing instead of making a new comment.
-
-        existing_reply = self.Comment(author=self.Author(self.user))
+        """Ensure that if there is an existing reply from a bot on a
+        comment that is being recompiled, the existing reply is
+        editing instead of making a new comment.
+        """
         body = ("+/u/{user} python 3\n\n    print(\"test\")\n\n"
                "\n\n".format(user=self.user))
-
-        replies = [existing_reply]
+        existing_reply = self.Comment(author=self.Author(self.user))
+        replies = [
+            self.Comment(author=self.Author('OneCommenter')),
+            existing_reply,
+            self.Comment(author=self.Author('AnotherCommenter'))
+        ]
         original = self.Comment(body=body, reddit_session=self.r,
                                 replies=replies)
         self.r._get_sub_comment = original
