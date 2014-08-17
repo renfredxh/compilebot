@@ -8,5 +8,4 @@ install:
   - cd ../../compilebot
   - cp sample-config.yml config.yml
 script: 
-  - cd compilebot
   - python -m tests.unit
