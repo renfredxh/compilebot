@@ -16,6 +16,10 @@
       - "rm "
       - "-rf"
       - "bitcontip"
+    # Relax spam detection on some subreddits
+    ignore:
+      - compilebot
+      - test
   # Optional aliases for languages
   lang_shortcuts:
     C++: C++11

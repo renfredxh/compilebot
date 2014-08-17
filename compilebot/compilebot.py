@@ -451,7 +451,7 @@ def process_unread(new, r):
                 "detected. Request deined.")
     if reply and isinstance(reply, CompiledReply):
         spam = reply.detect_spam()
-        if spam:
+        if spam and new.subreddit.display_name not in IGNORE_SPAM:
             text = ("Potential spam detected on comment {c.permalink} "
                     "by {c.author}: ".format(c=reply.parent_comment))
             text += ', '.join(spam)
@@ -518,9 +518,10 @@ INTERNAL_ERROR_TEXT =  TEXT['internal_error_text']
 RECOMPILE_ERROR_TEXT = TEXT['recompile_error_text']
 RECOMPILE_AUTHOR_ERROR_TEXT = TEXT['recompile_author_error_text']
 # Spam Settings
-LINE_LIMIT = CONFIG["spam"]["line_limit"]
-CHAR_LIMIT = CONFIG["spam"]["char_limit"]
-SPAM_PHRASES = CONFIG["spam"]["spam_phrases"]
+LINE_LIMIT = CONFIG['spam']['line_limit']
+CHAR_LIMIT = CONFIG['spam']['char_limit']
+SPAM_PHRASES = CONFIG['spam']['spam_phrases']
+IGNORE_SPAM = CONFIG['spam']['ignore']
 
 if __name__ == "__main__":
     main()
