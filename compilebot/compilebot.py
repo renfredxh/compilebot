@@ -7,6 +7,45 @@ import re
 import urllib
 import traceback
 from sys import exit
+from functools import wraps
+
+def handle_praw_exceptions(max_attempts=1):
+    """Return a function decorator that wraps a given function in a
+    try-except block that will handle various exceptions that may
+    occur during an API request to reddit. A maximum number of retry 
+    attempts may be specified.
+    """
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            retries = 0
+            while retries < max_attempts:
+                sleep_time = None
+                error_msg = ""
+                try:
+                    return func(*args, **kwargs)
+                except praw.errors.RateLimitExceeded as e:
+                    error_msg = "Rate Limit exceeded"
+                    sleep_time = e.sleep_time
+                except praw.requests.HTTPError as e:
+                    error_msg = "HTTPError \"{error}\" occurred".format(
+                        error=e)
+                    # Quit when encountering an HTTP 403 "Forbidden" errors.
+                    if '403' in str(e):
+                        log(error_msg)
+                        return
+                # Handle and log miscellaneous API exceptions
+                except praw.errors.APIException as e:
+                    error_msg = "API Exception \"{error}\" occurred".format(
+                        error=e)
+                sleep_time = sleep_time or retries * 150
+                log("{0} in {f}. Sleeping for {t} seconds. "
+                    "Attempt {rt} of {at}.".format(error_msg, f=func.__name__,
+                        t=sleep_time, rt=retries+1, at=max_attempts))
+                time.sleep(sleep_time)
+                retries += 1
+        return wrapper
+    return decorator
 
 class Reply(object):
 
@@ -37,39 +76,16 @@ class CompiledReply(Reply):
         Reply.__init__(self, text)
         self.compile_details = compile_details
         self.parent_comment = None
-        self.send_attempts = 0
 
+    @handle_praw_exceptions(max_attempts=3)
     def send(self, comment):
         """Send a reply to a specific reddit comment or message."""
         self.parent_comment = comment
         self.recipient = comment.author
-        self.send_attempts += 1
-        try:
-            comment.reply(self.text)
-            log("Replied to {id}".format(id=comment.id))
-        except praw.errors.RateLimitExceeded as e:
-            log("Rate Limit exceeded. "
-                "Sleeping for {time} seconds".format(time=e.sleep_time))
-            # Wait and try again.
-            time.sleep(e.sleep_time)
-            self.send(comment)
-        except praw.requests.HTTPError as e:
-            log("HTTPError on comment {id}, {error}".format(
-                id=comment.id, error=e))
-            # Handle HTTP 403 "Forbidden" errors.
-            if '403' in e:
-                return
-            elif self.send_attempts < 3:
-                log("HTTP Error encountered. "
-                    "Sleeping for {time} seconds".format(time=e.sleep_time))
-                sleep_time = self.send_attempts * 150
-                time.sleep(e.sleep_time)
-                self.send()
-        # Handle and log miscellaneous API exceptions
-        except praw.errors.APIException as e:
-            log("Exception on comment {id}, {error}".format(
-                id=comment.id, error=e))
+        comment.reply(self.text)
+        log("Replied to {id}".format(id=comment.id))
 
+    @handle_praw_exceptions(max_attempts=3)
     def make_edit(self, comment, parent):
         """Edit one of the bot's existing comments."""
         self.parent_comment = parent
@@ -107,6 +123,7 @@ class MessageReply(Reply):
         Reply.__init__(self, text)
         self.subject = subject
 
+    @handle_praw_exceptions(max_attempts=3)
     def send(self, comment):
         """Reply the author of a reddit comment by sending them a reply
         via private message.
@@ -123,6 +140,7 @@ class MessageReply(Reply):
         log("Message reply for comment {id} sent to {to}".format(
             id=comment.id, to=self.recipient))
 
+@handle_praw_exceptions(max_attempts=3)
 def log(message, alert=False):
     """Log messages along with a timestamp in a log file. If the alert
     option is set to true, send a message to the admin's reddit inbox.
@@ -343,6 +361,7 @@ def create_reply(comment):
         return MessageReply(error_text)
     return CompiledReply(text, details)
 
+@handle_praw_exceptions()
 def process_unread(new, r):
     """Parse a new comment or message for various options and ignore reply
     to as appropriate.

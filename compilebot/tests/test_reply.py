@@ -351,6 +351,60 @@ class TestDetectSpam(unittest.TestCase):
         reply.compile_details['stderr'] = "'rm -rf /*': Permission denied"
         self.assertIn("Illegal system call detected", reply.detect_spam())
 
+class TestHandlePrawExceptions(unittest.TestCase):
+
+    def test_generic_exceptions_propogate(self):
+        mock = Mock(side_effect=RuntimeError())
+        mock.__name__ = str('mock')
+
+        wrapped = cb.handle_praw_exceptions()(mock)
+        self.assertRaises(RuntimeError, wrapped)
+
+    def test_handle_rate_limit_exceeded(self):
+        error = cb.praw.errors.RateLimitExceeded('', '',
+                                                 response = {'ratelimit': 9})
+        mock = Mock(side_effect=error)
+        mock.__name__ = str('mock')
+        wrapped = cb.handle_praw_exceptions()(mock)
+        with patch('__main__.cb.time.sleep') as mock_sleep:
+            try:
+                wrapped()
+            except cb.praw.errors.RateLimitExceeded:
+                self.fail("RateLimitExceeded not properly handled")
+        mock_sleep.assert_called_once_with(9)
+
+    def test_handle_generic_HTTP_Error(self):
+        error = cb.praw.requests.HTTPError('')
+        mock = Mock(side_effect=error)
+        mock.__name__ = str('mock')
+        wrapped = cb.handle_praw_exceptions()(mock)
+        with patch('__main__.cb.time.sleep') as mock_sleep:
+            try:
+                wrapped()
+            except cb.praw.requests.HTTPError:
+                self.fail("HTTPError not properly handled")
+
+    def test_handle_HTTP_403_Error(self):
+        error = cb.praw.requests.HTTPError('403 Forbidden')
+        mock = Mock(side_effect=error)
+        mock.__name__ = str('mock')
+        wrapped = cb.handle_praw_exceptions(max_attempts=2)(mock)
+        with patch('__main__.cb.time.sleep') as mock_sleep:
+            wrapped()
+            assert not mock_sleep.called, ("Should not attempt retry "
+                                           "after 403 error")
+
+    def test_handle_API_Exceptions(self):
+        error = cb.praw.errors.APIException('', '', {})
+        mock = Mock(side_effect=error)
+        mock.__name__ = str('mock')
+        wrapped = cb.handle_praw_exceptions()(mock)
+        with patch('__main__.cb.time.sleep') as mock_sleep:
+            wrapped()
+            try:
+                wrapped()
+            except cb.praw.requests.HTTPError:
+                self.fail("APIException not properly handled")
 
 if __name__ == "__main__":
     unittest.main(exit=False)
