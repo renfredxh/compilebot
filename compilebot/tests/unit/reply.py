@@ -3,15 +3,15 @@ import unittest
 import compilebot as cb
 from sys import modules
 from mock import Mock, patch
-from . import helpers
+from tests import helpers
 
 """
 Unit test cases for functions, methods, and classes that format, create,
 and edit replies. All tests in this module shouldn't make any requests
 to reddit or ideone.
 
-Run the following command from the parent directory in order to run only
-this test module: python -m unittest tests.test_reply
+Run the following command from the compilebot directory in order to run only
+this test module: python -m unittest tests.unit.reply
 """
 
 cb.LOG_FILE = helpers.LOG_FILE
