@@ -480,29 +480,29 @@ def main():
             new.mark_as_read()
 
 # Settings
-SETTINGS_FILE = 'config.yml'
+CONFIG_FILE = 'config.yml'
 # Fetch settings from json file
 try:
-    with open(SETTINGS_FILE, 'r') as f:
-        SETTINGS = yaml.load(f)
+    with open(CONFIG_FILE, 'r') as f:
+        CONFIG = yaml.load(f)
 except (OSError, IOError) as e:
     print("Please configure config.yml")
     exit(1)
-LOG_FILE = SETTINGS['log_file']
+LOG_FILE = CONFIG['log_file']
 # Login credentials
-I_USERNAME = SETTINGS['ideone_user']
-I_PASSWORD = SETTINGS['ideone_pass']
-R_USERNAME = SETTINGS['reddit_user']
-R_PASSWORD = SETTINGS['reddit_pass']
-USER_AGENT = SETTINGS['user_agent']
-ADMIN = SETTINGS['admin_user']
-SUBREDDIT = SETTINGS['subreddit']
-LANG_SHORTCUTS = {k.lower(): v for k, v in SETTINGS['lang_shortcuts'].items()}
+I_USERNAME = CONFIG['ideone_user']
+I_PASSWORD = CONFIG['ideone_pass']
+R_USERNAME = CONFIG['reddit_user']
+R_PASSWORD = CONFIG['reddit_pass']
+USER_AGENT = CONFIG['user_agent']
+ADMIN = CONFIG['admin_user']
+SUBREDDIT = CONFIG['subreddit']
+LANG_SHORTCUTS = {k.lower(): v for k, v in CONFIG['lang_shortcuts'].items()}
 # A set of users that are banned. The banned users list is retrieved
 # in the main session but not here because it requires a reddit login.
 BANNED_USERS = set()
 # Text
-TEXT = SETTINGS['text']
+TEXT = CONFIG['text']
 FOOTER = TEXT['footer']
 ERROR_PREAMBLE = TEXT['error_preamble']
 ERROR_POSTAMBLE = TEXT['error_postamble']
@@ -518,9 +518,9 @@ INTERNAL_ERROR_TEXT =  TEXT['internal_error_text']
 RECOMPILE_ERROR_TEXT = TEXT['recompile_error_text']
 RECOMPILE_AUTHOR_ERROR_TEXT = TEXT['recompile_author_error_text']
 # Spam Settings
-LINE_LIMIT = SETTINGS["spam"]["line_limit"]
-CHAR_LIMIT = SETTINGS["spam"]["char_limit"]
-SPAM_PHRASES = SETTINGS["spam"]["spam_phrases"]
+LINE_LIMIT = CONFIG["spam"]["line_limit"]
+CHAR_LIMIT = CONFIG["spam"]["char_limit"]
+SPAM_PHRASES = CONFIG["spam"]["spam_phrases"]
 
 if __name__ == "__main__":
     main()
