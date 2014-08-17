@@ -34,7 +34,7 @@ RUN pip install -r requirements.txt
 WORKDIR lib/ideone-api
 RUN python setup.py install
 
-ADD config.yml /compilebot/compilebot/config.yml
+RUN cp /compilebot/compilebot/sample-config.yml /compilebot/compilebot/config.yml
 WORKDIR /compilebot/compilebot
 
 # Use Gunicorn to server the application
