@@ -27,6 +27,14 @@
     Java 7: Java7
     C99: C99 strict
     Node: Node.js
+  tests:
+    integration:
+      reddit:
+        skip: False
+        test_comment: cjsvxip # Comment id of a metion.
+        accepted_substring: "Output:\n\n    Hello World"
+      compiler:
+        skip: False
   text:
     footer: |
         [^source]({ide_link}) ^|

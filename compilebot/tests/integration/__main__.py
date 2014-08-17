@@ -12,6 +12,7 @@ def main():
     print("Running CompileBot integration tests")
     test_suites = [
         compiler.test_suite(),
+        reddit.test_suite()
     ]
     all_tests = unittest.TestSuite(test_suites)
     unittest.TextTestRunner().run(all_tests)

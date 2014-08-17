@@ -3,14 +3,14 @@ import unittest
 import compilebot as cb
 
 """
-Unit test cases for the compile function. Tests require an ideone login
+Integration test cases for the compile function. Tests require ideone login
 credentials.
 
 Run the following command from the parent directory in order to run only
-this test module: python -m unittest tests.test_compiler
+this test module: python -m unittest tests.integration.compiler
 """
 
-cb.USER_AGENT = "compilebot unit tests run by {}".format(cb.R_USERNAME)
+cb.USER_AGENT = "compilebot integration tests run by {}".format(cb.R_USERNAME)
 cb.LOG_FILE = "tests.log"
 
 def test_suite():
@@ -22,9 +22,9 @@ def test_suite():
     ]
     return unittest.TestSuite(alltests)
 
-
+@unittest.skipIf(cb.CONFIG['tests']['integration']['compiler']['skip'],
+                 "Test config option set to skip")
 class TestCompile(unittest.TestCase):
-
 
     def test_compile(self):
         expected_details = {
