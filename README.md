@@ -30,7 +30,9 @@ If you would like to contribute new features, or fix bugs or contribute anything
 
 # Installation
 
-To install compilebot, you can follow the following steps. Using [virtualenv](http://www.virtualenv.org) is recommended.
+If you're familliar with [Docker](https://www.docker.com/), you might want to try using compilebot's [Docker repository](https://registry.hub.docker.com/u/renfredxh/compilebot/).
+
+To install compilebot locally, you can follow the following steps. Using [virtualenv](http://www.virtualenv.org) is recommended.
 
 ```bash
 git clone https://github.com/renfredxh/compilebot.git
