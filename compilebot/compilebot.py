@@ -355,7 +355,7 @@ def create_reply(comment):
                                 code_block(details['cmpinfo']))
         if details['output']:
             error_text += "Output:\n\n{}\n\n".format(
-                    code_block(details['cmpinfo']))
+                    code_block(details['output']))
         if details['stderr']:
             error_text += "Error Output:\n\n{}\n\n".format(
                                 code_block(details['stderr']))
