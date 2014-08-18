@@ -37,5 +37,4 @@ RUN python setup.py install
 RUN cp /compilebot/compilebot/sample-config.yml /compilebot/compilebot/config.yml
 WORKDIR /compilebot/compilebot
 
-# Use Gunicorn to server the application
 CMD python deploy.py
