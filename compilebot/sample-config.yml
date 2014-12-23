@@ -21,7 +21,7 @@
       - compilebot
       - test
   # Optional aliases for languages
-  lang_shortcuts:
+  lang_aliases:
     C++: C++11
     Brainfuck: Brainf**k
     Lisp: Common Lisp

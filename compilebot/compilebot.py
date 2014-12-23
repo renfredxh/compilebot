@@ -173,7 +173,7 @@ def compile(source, lang, stdin=''):
     Hello World
 
     """
-    lang = LANG_SHORTCUTS.get(lang.lower(), lang)
+    lang = LANG_ALIASES.get(lang.lower(), lang)
     # Login to ideone and create a submission
     i = ideone.Ideone(I_USERNAME, I_PASSWORD)
     sub = i.create_submission(source, language_name=lang, std_input=stdin)

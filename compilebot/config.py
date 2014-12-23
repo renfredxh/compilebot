@@ -23,7 +23,7 @@ USER_AGENT = CONFIG['user_agent']
 ADMIN = CONFIG['admin_user']
 SUBREDDIT = CONFIG['subreddit']
 
-LANG_SHORTCUTS = {k.lower(): v for k, v in CONFIG['lang_shortcuts'].items()}
+LANG_ALIASES = {k.lower(): v for k, v in CONFIG['lang_aliases'].items()}
 
 # A set of users that are banned. The banned users list is retrieved
 # in the main session but not here because it requires a reddit login.
