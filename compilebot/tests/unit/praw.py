@@ -130,12 +130,10 @@ class TestMain(unittest.TestCase):
     @patch('{}.cb.praw.Reddit'.format(__name__), autospec=True)
     def test_main(self, mock_reddit, mock_process_unread):
         r = mock_reddit.return_value
-        cb.R_USERNAME = 'TestUser'
-        cb.R_PASSWORD = 'hunter2'
         mock_inbox = [Mock(), Mock(), Mock()]
         r.get_unread.return_value = mock_inbox
         cb.main()
-        r.login.assert_called_with('TestUser', 'hunter2')
+        r.login.assert_called_with(cb.R_USERNAME, cb.R_PASSWORD)
         for new in mock_inbox:
             mock_process_unread.assert_any_call(new, r)
             new.mark_as_read.assert_called_with()
