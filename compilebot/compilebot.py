@@ -450,8 +450,9 @@ def process_unread(new, r):
             log("Attempt to reompile on behalf of another author "
                 "detected. Request deined.")
     if reply and isinstance(reply, CompiledReply):
+        # Report any potential spam to the moderators.
         spam = reply.detect_spam()
-        if spam and new.subreddit.display_name not in IGNORE_SPAM:
+        if spam and reply.parent_comment.subreddit.display_name not in IGNORE_SPAM:
             text = ("Potential spam detected on comment {c.permalink} "
                     "by {c.author}: ".format(c=reply.parent_comment))
             text += ', '.join(spam)
