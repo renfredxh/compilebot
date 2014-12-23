@@ -34,10 +34,12 @@ def main():
             time.sleep(SLEEP_TIME)
     except KeyboardInterrupt:
         exit_msg = ''
+        exit(0)
     except Exception as e:
         tb = traceback.format_exc()
         exit_msg = "Depoyment error: {traceback}\n".format(traceback=tb)
         bot.log("{msg}Bot shutting down".format(msg=exit_msg), alert=True)
+        exit(1)
 
 if __name__ == "__main__":
     main()
