@@ -1,6 +1,8 @@
 from __future__ import unicode_literals, print_function
 import unittest
 import compilebot as cb
+import socket
+import errno
 from sys import modules
 from mock import Mock, patch
 from tests import helpers
@@ -18,7 +20,8 @@ cb.LOG_FILE = helpers.LOG_FILE
 
 def test_suite():
     cases = [
-        TestParseComment, TestCreateReply, TestProcessUnread, TestDetectSpam
+        TestParseComment, TestCreateReply, TestProcessUnread, TestDetectSpam,
+        TestHandleAPIExceptions
     ]
     alltests = [
         unittest.TestLoader().loadTestsFromTestCase(case) for case in cases
@@ -364,13 +367,13 @@ class TestDetectSpam(unittest.TestCase):
         reply.compile_details['stderr'] = "'rm -rf /*': Permission denied"
         self.assertIn("Illegal system call detected", reply.detect_spam())
 
-class TestHandlePrawExceptions(unittest.TestCase):
+class TestHandleAPIExceptions(unittest.TestCase):
 
     def test_generic_exceptions_propogate(self):
         mock = Mock(side_effect=RuntimeError())
         mock.__name__ = str('mock')
 
-        wrapped = cb.handle_praw_exceptions()(mock)
+        wrapped = cb.handle_api_exceptions()(mock)
         self.assertRaises(RuntimeError, wrapped)
 
     def test_handle_rate_limit_exceeded(self):
@@ -378,8 +381,8 @@ class TestHandlePrawExceptions(unittest.TestCase):
                                                  response = {'ratelimit': 9})
         mock = Mock(side_effect=error)
         mock.__name__ = str('mock')
-        wrapped = cb.handle_praw_exceptions()(mock)
-        with patch('__main__.cb.time.sleep') as mock_sleep:
+        wrapped = cb.handle_api_exceptions()(mock)
+        with patch('{}.cb.time.sleep'.format(__name__)) as mock_sleep:
             try:
                 wrapped()
             except cb.praw.errors.RateLimitExceeded:
@@ -390,8 +393,8 @@ class TestHandlePrawExceptions(unittest.TestCase):
         error = cb.praw.requests.HTTPError('')
         mock = Mock(side_effect=error)
         mock.__name__ = str('mock')
-        wrapped = cb.handle_praw_exceptions()(mock)
-        with patch('__main__.cb.time.sleep') as mock_sleep:
+        wrapped = cb.handle_api_exceptions()(mock)
+        with patch('{}.cb.time.sleep'.format(__name__)) as mock_sleep:
             try:
                 wrapped()
             except cb.praw.requests.HTTPError:
@@ -401,23 +404,35 @@ class TestHandlePrawExceptions(unittest.TestCase):
         error = cb.praw.requests.HTTPError('403 Forbidden')
         mock = Mock(side_effect=error)
         mock.__name__ = str('mock')
-        wrapped = cb.handle_praw_exceptions(max_attempts=2)(mock)
-        with patch('__main__.cb.time.sleep') as mock_sleep:
+        wrapped = cb.handle_api_exceptions(max_attempts=2)(mock)
+        with patch('{}.cb.time.sleep'.format(__name__)) as mock_sleep:
             wrapped()
-            assert not mock_sleep.called, ("Should not attempt retry "
-                                           "after 403 error")
+            # Should not attempt retry after 403 error
+            self.assertFalse(mock_sleep.called)
 
     def test_handle_API_Exceptions(self):
         error = cb.praw.errors.APIException('', '', {})
         mock = Mock(side_effect=error)
         mock.__name__ = str('mock')
-        wrapped = cb.handle_praw_exceptions()(mock)
-        with patch('__main__.cb.time.sleep') as mock_sleep:
+        wrapped = cb.handle_api_exceptions()(mock)
+        with patch('{}.cb.time.sleep'.format(__name__)) as mock_sleep:
             wrapped()
             try:
                 wrapped()
             except cb.praw.requests.HTTPError:
                 self.fail("APIException not properly handled")
+
+    def test_handle_Socket_Error(self):
+        error = socket.error('[Errno 104] Connection reset by peer')
+        error.errno = errno.ECONNRESET
+        mock = Mock(side_effect=error)
+        mock.__name__ = str('mock')
+        wrapped = cb.handle_api_exceptions()(mock)
+        with patch('{}.cb.time.sleep'.format(__name__)) as mock_sleep:
+            try:
+                wrapped()
+            except cb.praw.socket.SocketError:
+                self.fail("SocketError not properly handled")
 
 if __name__ == "__main__":
     unittest.main(exit=False)

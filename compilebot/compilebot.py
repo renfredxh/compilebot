@@ -5,11 +5,12 @@ import praw
 import re
 import urllib
 import traceback
+from socket import error as SocketError
 from sys import exit
 from functools import wraps
 from config import *
 
-def handle_praw_exceptions(max_attempts=1):
+def handle_api_exceptions(max_attempts=1):
     """Return a function decorator that wraps a given function in a
     try-except block that will handle various exceptions that may
     occur during an API request to reddit. A maximum number of retry 
@@ -28,7 +29,7 @@ def handle_praw_exceptions(max_attempts=1):
                     error_msg = "Rate Limit exceeded"
                     sleep_time = e.sleep_time
                 except praw.requests.HTTPError as e:
-                    error_msg = "HTTPError \"{error}\" occurred".format(
+                    error_msg = "HTTPError \"{error}\" occurred: ".format(
                         error=e)
                     # Quit when encountering an HTTP 403 "Forbidden" errors.
                     if '403' in str(e):
@@ -36,8 +37,12 @@ def handle_praw_exceptions(max_attempts=1):
                         return
                 # Handle and log miscellaneous API exceptions
                 except praw.errors.APIException as e:
-                    error_msg = "API Exception \"{error}\" occurred".format(
+                    error_msg = "API Exception \"{error}\" occurred: ".format(
                         error=e)
+                except SocketError as e:
+                    error_msg = "SocketError \"{error}\" occurred: ".format(
+                        error=e)
+                    log(error_msg)
                 sleep_time = sleep_time or retries * 150
                 log("{0} in {f}. Sleeping for {t} seconds. "
                     "Attempt {rt} of {at}.".format(error_msg, f=func.__name__,
@@ -77,7 +82,7 @@ class CompiledReply(Reply):
         self.compile_details = compile_details
         self.parent_comment = None
 
-    @handle_praw_exceptions(max_attempts=3)
+    @handle_api_exceptions(max_attempts=3)
     def send(self, comment):
         """Send a reply to a specific reddit comment or message."""
         self.parent_comment = comment
@@ -85,7 +90,7 @@ class CompiledReply(Reply):
         comment.reply(self.text)
         log("Replied to {id}".format(id=comment.id))
 
-    @handle_praw_exceptions(max_attempts=3)
+    @handle_api_exceptions(max_attempts=3)
     def make_edit(self, comment, parent):
         """Edit one of the bot's existing comments."""
         self.parent_comment = parent
@@ -123,7 +128,7 @@ class MessageReply(Reply):
         Reply.__init__(self, text)
         self.subject = subject
 
-    @handle_praw_exceptions(max_attempts=3)
+    @handle_api_exceptions(max_attempts=3)
     def send(self, comment):
         """Reply the author of a reddit comment by sending them a reply
         via private message.
@@ -140,7 +145,7 @@ class MessageReply(Reply):
         log("Message reply for comment {id} sent to {to}".format(
             id=comment.id, to=self.recipient))
 
-@handle_praw_exceptions(max_attempts=3)
+@handle_api_exceptions(max_attempts=3)
 def log(message, alert=False):
     """Log messages along with a timestamp in a log file. If the alert
     option is set to true, send a message to the admin's reddit inbox.
@@ -159,6 +164,7 @@ def log(message, alert=False):
         subject = "CompileBot Alert"
         r.send_message(ADMIN, subject, admin_alert)
 
+@handle_api_exceptions(max_attempts=3)
 def compile(source, lang, stdin=''):
     """Compile and evaluate source sode using the ideone API and return
     a dict containing the output details.
@@ -194,14 +200,14 @@ def code_block(text):
         text = text.replace(char, '\n    ')
     return text
 
-@handle_praw_exceptions()
+@handle_api_exceptions()
 def get_banned(reddit):
     """Retrive list of banned users list from the moderator subreddit"""
     banned = {user.name.lower() for user in
                 reddit.get_subreddit(SUBREDDIT).get_banned()}
     return banned
 
-@handle_praw_exceptions()
+@handle_api_exceptions()
 def send_modmail(subject, body, reddit):
     """Send a message to the bot moderators"""
     if SUBREDDIT:
@@ -363,7 +369,7 @@ def create_reply(comment):
         return MessageReply(error_text)
     return CompiledReply(text, details)
 
-@handle_praw_exceptions()
+@handle_api_exceptions()
 def process_unread(new, r):
     """Parse a new comment or message for various options and ignore reply
     to as appropriate.
@@ -460,7 +466,7 @@ def process_unread(new, r):
             send_modmail("Potential spam detected", text, r)
             log(text)
 
-@handle_praw_exceptions()
+@handle_api_exceptions()
 def main():
     r = praw.Reddit(USER_AGENT)
     r.login(R_USERNAME, R_PASSWORD)
