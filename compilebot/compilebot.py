@@ -391,7 +391,7 @@ def process_unread(new, r):
         reply.send(new)
     elif ((not new.was_comment) and
           re.match(r'(i?)\s*--report', new.body) and SUBREDDIT):
-        # Forward message to the moderators
+        # Forward a reported message to the moderators.
         send_modmail("Report from {author}".format(author=new.author),
                      new.body, r)
         reply = MessageReply("Your message has been forwarded to the "
@@ -422,33 +422,34 @@ def process_unread(new, r):
         # request on the behalf of another.
         if original.author == new.author:
             reply = create_reply(original)
-            # Ensure the recompiled reply resulted in a valid comment
-            # reply and not an error message reply.
-            if isinstance(reply, CompiledReply):
-                # Search for an existing comment reply from the bot.
-                # If one is found, edit the existing comment instead
-                # of creating a new one.
-                #
-                # Note: the .replies property only returns a limited
-                # number of comments. If the reply is buried, it will
-                # not be retrieved and a new one will be created
-                for rp in original.replies:
-                    if rp.author.name.lower() == R_USERNAME.lower():
-                        footnote = ("\n\n**EDIT:** Recompile request "
-                                    "by {}".format(new.author))
-                        reply.text += footnote
-                        reply.make_edit(rp, original)
-                        break
-                else:
-                    # Reply to the original comment.
-                    reply.send(original)
-            else:
-                # Send a message reply.
-                reply.send(new)
         else:
             new.reply(RECOMPILE_AUTHOR_ERROR_TEXT)
             log("Attempt to reompile on behalf of another author "
                 "detected. Request deined.")
+            return
+        # Ensure the recompiled reply resulted in a valid comment
+        # reply and not an error message reply.
+        if isinstance(reply, CompiledReply):
+            # Search for an existing comment reply from the bot.
+            # If one is found, edit the existing comment instead
+            # of creating a new one.
+            #
+            # Note: the .replies property only returns a limited
+            # number of comments. If the reply is buried, it will
+            # not be retrieved and a new one will be created
+            for rp in original.replies:
+                if rp.author.name.lower() == R_USERNAME.lower():
+                    footnote = ("\n\n**EDIT:** Recompile request "
+                                "by {}".format(new.author))
+                    reply.text += footnote
+                    reply.make_edit(rp, original)
+                    break
+            else:
+                # Reply to the original comment.
+                reply.send(original)
+        else:
+            # Send a message reply.
+            reply.send(new)
     if reply and isinstance(reply, CompiledReply):
         # Report any potential spam to the moderators.
         spam = reply.detect_spam()
