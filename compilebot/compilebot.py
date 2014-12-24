@@ -338,7 +338,7 @@ def create_reply(comment):
     result_code = details['result']
     # The user is alerted of any errors via message reply unless they
     # include an option to include errors in the reply.
-    if result_code == 15 or '--include-errors' in opts:
+    if result_code == 15 or ('--include-errors' in opts and result_code in [11, 12]):
         text = format_reply(details, opts)
         ideone_link = "http://ideone.com/{}".format(details['link'])
         url_pl = urllib.quote(comment.permalink)
