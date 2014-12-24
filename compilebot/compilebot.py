@@ -109,7 +109,8 @@ class CompiledReply(Reply):
         spam_behaviors = {
             "Excessive line breaks": output.count('\n') > LINE_LIMIT,
             "Excessive character count": len(output) > CHAR_LIMIT,
-            "Spam phrase detected": any([word.lower() in (source + output).lower()
+            "Spam phrase detected": any([word.encode('utf-8').lower() in
+                                         (source + output).encode('utf-8').lower()
                                          for word in SPAM_PHRASES]),
             "Illegal system call detected": "Permission denied" in errors
         }
