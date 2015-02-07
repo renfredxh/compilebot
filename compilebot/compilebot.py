@@ -421,7 +421,11 @@ def process_unread(new, r):
             return
         # Fetch the comment that will be recompiled.
         sub = r.get_submission(submission_id=id, comment_sort='best')
-        original = sub.comments[0]
+        try:
+            original = sub.comments[0]
+        except IndexError:
+            # In case the comment is deleted
+            return
         log("Processing request to recompile {id} from {user}"
             "".format(id=original.id, user=new.author))
         # Ensure the author of the original comment matches the author
