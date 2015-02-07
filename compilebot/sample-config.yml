@@ -22,7 +22,7 @@
       - test
   # Optional aliases for languages
   lang_aliases:
-    C++: C++11
+    C++: C++14
     Brainfuck: Brainf**k
     Lisp: Common Lisp
     Python3: Python 3
