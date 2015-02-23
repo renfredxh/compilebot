@@ -31,6 +31,7 @@
     Java 7: Java7
     C99: C99 strict
     Node: Node.js
+    JavaScript: JavaScript (spidermonkey) (spidermonkey 24.2)
   tests:
     integration:
       reddit:
