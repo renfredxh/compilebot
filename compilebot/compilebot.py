@@ -28,7 +28,7 @@ def handle_api_exceptions(max_attempts=1):
                 except praw.errors.RateLimitExceeded as e:
                     error_msg = "Rate Limit exceeded"
                     sleep_time = e.sleep_time
-                except praw.requests.HTTPError as e:
+                except praw.errors.HTTPException as e:
                     error_msg = "HTTPError \"{error}\" occurred: ".format(
                         error=e)
                     # Quit when encountering an HTTP 403 "Forbidden" errors.
