@@ -475,7 +475,8 @@ def process_unread(new, r):
 @handle_api_exceptions()
 def main():
     r = praw.Reddit(USER_AGENT)
-    r.login(R_USERNAME, R_PASSWORD)
+    # TODO update login method.
+    r.login(R_USERNAME, R_PASSWORD, disable_warning=True)
     if SUBREDDIT:
         global BANNED_USERS
         BANNED_USERS = get_banned(r)
