@@ -490,7 +490,7 @@ def main():
             tb = traceback.format_exc()
             # Notify admin of any errors
             log("Error processing comment {c.id}\n"
-                "{traceback}".format(c=new, traceback=tb), alert=True)
+                "{traceback}".format(c=new, traceback=code_block(tb)), alert=True)
         finally:
             new.mark_as_read()
 
