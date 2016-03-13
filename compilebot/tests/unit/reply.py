@@ -377,7 +377,7 @@ class TestHandleAPIExceptions(unittest.TestCase):
         self.assertRaises(RuntimeError, wrapped)
 
     def test_handle_rate_limit_exceeded(self):
-        error = cb.praw.errors.RateLimitExceeded('', '',
+        error = cb.praw.errors.RateLimitExceeded('', '', '',
                                                  response = {'ratelimit': 9})
         mock = Mock(side_effect=error)
         mock.__name__ = str('mock')
@@ -390,37 +390,15 @@ class TestHandleAPIExceptions(unittest.TestCase):
         mock_sleep.assert_called_once_with(9)
 
     def test_handle_generic_HTTP_Error(self):
-        error = cb.praw.requests.HTTPError('')
+        error = cb.praw.errors.HTTPException('')
         mock = Mock(side_effect=error)
         mock.__name__ = str('mock')
         wrapped = cb.handle_api_exceptions()(mock)
         with patch('{}.cb.time.sleep'.format(__name__)) as mock_sleep:
             try:
                 wrapped()
-            except cb.praw.requests.HTTPError:
+            except cb.praw.errors.HTTPException:
                 self.fail("HTTPError not properly handled")
-
-    def test_handle_HTTP_403_Error(self):
-        error = cb.praw.requests.HTTPError('403 Forbidden')
-        mock = Mock(side_effect=error)
-        mock.__name__ = str('mock')
-        wrapped = cb.handle_api_exceptions(max_attempts=2)(mock)
-        with patch('{}.cb.time.sleep'.format(__name__)) as mock_sleep:
-            wrapped()
-            # Should not attempt retry after 403 error
-            self.assertFalse(mock_sleep.called)
-
-    def test_handle_API_Exceptions(self):
-        error = cb.praw.errors.APIException('', '', {})
-        mock = Mock(side_effect=error)
-        mock.__name__ = str('mock')
-        wrapped = cb.handle_api_exceptions()(mock)
-        with patch('{}.cb.time.sleep'.format(__name__)) as mock_sleep:
-            wrapped()
-            try:
-                wrapped()
-            except cb.praw.requests.HTTPError:
-                self.fail("APIException not properly handled")
 
     def test_handle_Socket_Error(self):
         error = socket.error('[Errno 104] Connection reset by peer')

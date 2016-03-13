@@ -77,7 +77,7 @@ class TestMain(unittest.TestCase):
         mock_inbox = [Mock(), Mock(), Mock()]
         r.get_unread.return_value = mock_inbox
         cb.main()
-        r.login.assert_called_with(cb.R_USERNAME, cb.R_PASSWORD)
+        self.assertTrue(r.login.called)
         for new in mock_inbox:
             mock_process_unread.assert_any_call(new, r)
             new.mark_as_read.assert_called_with()
