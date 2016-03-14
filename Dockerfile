@@ -7,7 +7,7 @@
 # Build Command: sudo docker build -t compilebot .
 
 # Set the base image to Ubuntu
-FROM ubuntu
+FROM python:2.7
 
 # File Author / Maintainer
 MAINTAINER Renfred Harper
@@ -17,9 +17,6 @@ RUN apt-get update
 
 # Install basic applications
 RUN apt-get install -y tar git curl nano wget dialog net-tools build-essential
-
-# Install Python and Basic Python Tools
-RUN apt-get install -y python python-dev python-distribute python-pip
 
 # Clone compilebot
 RUN git clone https://github.com/renfredxh/compilebot.git
