@@ -15,7 +15,7 @@
     spam_phrases:
       - "rm "
       - "-rf"
-      - "bitcontip"
+      - "bitcointip"
     # Relax spam detection on some subreddits
     ignore:
       - compilebot
