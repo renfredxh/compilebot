@@ -24,9 +24,9 @@ CombileBot is powered by the "compilebot" module which is written in python (2.7
 
 # Contributing
 
-CompileBot would appreciate any help it can get. Even if you don't want to contribute to the compilebot source, we need people for testing, improving documentation, and making donations to help support CompileBot's server space and ideone subscription. For more details on with contributing with anything non-technical, you can find out more on the [CompileBot contribution wiki](http://www.reddit.com/r/CompileBot/wiki/index#wiki_contributing).
+CompileBot would appreciate any help it can get. Even if you don't want to contribute to the compilebot source, we need people for testing, improving documentation, and making donations to help support CompileBot's server space and ideone subscription. For more details on contributing anything non-technical, you can find out more on the [CompileBot contribution wiki](http://www.reddit.com/r/CompileBot/wiki/index#wiki_contributing).
 
-If you would like to contribute new features, or fix bugs or contribute anything else to the compilebot module, you can follow the instructions below to get a local instance of compilebot set up on your system.
+If you would like to contribute new features, or fix bugs, or contribute anything else to the compilebot module, you can follow the instructions below to get a local instance of compilebot set up on your system.
 
 # Installation
 

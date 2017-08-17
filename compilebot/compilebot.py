@@ -168,7 +168,7 @@ def log(message, alert=False):
 
 @handle_api_exceptions(max_attempts=3)
 def compile(source, lang, stdin=''):
-    """Compile and evaluate source sode using the ideone API and return
+    """Compile and evaluate source code using the ideone API and return
     a dict containing the output details.
 
     Keyword arguments:
@@ -204,7 +204,7 @@ def code_block(text):
 
 @handle_api_exceptions()
 def get_banned(reddit):
-    """Retrive list of banned users list from the moderator subreddit"""
+    """Retrieve list of banned users list from the moderator subreddit"""
     banned = {user.name.lower() for user in
                 reddit.get_subreddit(SUBREDDIT).get_banned()}
     return banned
@@ -312,7 +312,7 @@ def create_reply(comment):
         log("Formatting error on comment {c.permalink}".format(
             c=comment))
         return MessageReply(error_text)
-    # Seperate the language name from the rest of the supplied options.
+    # Separate the language name from the rest of the supplied options.
     try:
         lang, opts = args.split(' -', 1)
         opts = ('-' + opts).split()
@@ -333,7 +333,7 @@ def create_reply(comment):
         # TODO Add link to accepted languages to msg
         log("Language error on comment {id}".format(id=comment.id))
         return MessageReply(error_text)
-    # The ideone submission result value indicaties the final state of
+    # The ideone submission result value indicates the final state of
     # the program. If the program compiled and ran successfully the
     # result is 15. Other codes indicate various errors.
     result_code = details['result']
@@ -436,8 +436,8 @@ def process_unread(new, r):
             reply = create_reply(original)
         else:
             new.reply(RECOMPILE_AUTHOR_ERROR_TEXT)
-            log("Attempt to reompile on behalf of another author "
-                "detected. Request deined.")
+            log("Attempt to recompile on behalf of another author "
+                "detected. Request denied.")
             return
         # Ensure the recompiled reply resulted in a valid comment
         # reply and not an error message reply.

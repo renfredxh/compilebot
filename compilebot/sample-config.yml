@@ -53,7 +53,7 @@
         >
         >     print "Hello World!"
 
-        CompileBot will then process your comment, execute it remotely, and then respond with the output:
+        CompileBot will process your comment, execute it remotely, and then respond with the output:
 
         > Output:
         >
@@ -104,10 +104,10 @@
     illegal_error_text: |
         Your program attempted to use a restricted system function.
     internal_error_text: |
-        There an internal error has occoured ideone's compilation servers.
-        Please wait an try again.
+        An internal error has occurred on ideone's compilation servers.
+        Please wait and try again.
     recompile_error_text: |
-        There was an error processing you recompilation request.
+        There was an error processing your recompilation request.
         Make sure your message contains "--recompile" followed by a valid comment permalink. [View more details on recompiling here]
         (http://www.reddit.com/r/CompileBot/wiki/index#wiki_recompiling).
     recompile_author_error_text: |
