@@ -5,10 +5,10 @@ import praw
 import re
 import urllib
 import traceback
+import config
 from socket import error as SocketError
 from sys import exit
 from functools import wraps
-from config import *
 
 def handle_api_exceptions(max_attempts=1):
     """Return a function decorator that wraps a given function in a
@@ -107,11 +107,11 @@ class CompiledReply(Reply):
         errors = self.compile_details['stderr']
 
         spam_behaviors = {
-            "Excessive line breaks": output.count('\n') > LINE_LIMIT,
-            "Excessive character count": len(output) > CHAR_LIMIT,
+            "Excessive line breaks": output.count('\n') > config.LINE_LIMIT,
+            "Excessive character count": len(output) > config.CHAR_LIMIT,
             "Spam phrase detected": any([word.encode('utf-8').lower() in
                                          (source + output).encode('utf-8').lower()
-                                         for word in SPAM_PHRASES]),
+                                         for word in config.SPAM_PHRASES]),
             "Illegal system call detected": "Permission denied" in errors
         }
         if any(spam_behaviors.values()):
@@ -141,7 +141,7 @@ class MessageReply(Reply):
         if not self.subject:
             self.subject = "Comment {id}".format(id=comment.id)
         # Prepend message subject with username
-        self.subject = "{} - {}".format(R_USERNAME, self.subject)
+        self.subject = "{} - {}".format(config.R_USERNAME, self.subject)
         r.send_message(self.recipient, self.subject, self.text)
         log("Message reply for comment {id} sent to {to}".format(
             id=comment.id, to=self.recipient))
@@ -159,12 +159,12 @@ def log(message, alert=False):
             f.write(message)
     else:
         print(message, end='')
-    if alert and ADMIN:
-        r = praw.Reddit(USER_AGENT)
-        r.login(R_USERNAME, R_PASSWORD)
+    if alert and config.ADMIN:
+        r = praw.Reddit(config.USER_AGENT)
+        r.login(config.R_USERNAME, config.R_PASSWORD)
         admin_alert = message
         subject = "CompileBot Alert"
-        r.send_message(ADMIN, subject, admin_alert)
+        r.send_message(config.ADMIN, subject, admin_alert)
 
 @handle_api_exceptions(max_attempts=3)
 def compile(source, lang, stdin=''):
@@ -181,9 +181,9 @@ def compile(source, lang, stdin=''):
     Hello World
 
     """
-    lang = LANG_ALIASES.get(lang.lower(), lang)
+    lang = config.LANG_ALIASES.get(lang.lower(), lang)
     # Login to ideone and create a submission
-    i = ideone.Ideone(I_USERNAME, I_PASSWORD)
+    i = ideone.Ideone(config.I_USERNAME, config.I_PASSWORD)
     sub = i.create_submission(source, language_name=lang, std_input=stdin)
     sub_link = sub['link']
     details = i.submission_details(sub_link)
@@ -206,14 +206,14 @@ def code_block(text):
 def get_banned(reddit):
     """Retrieve list of banned users list from the moderator subreddit"""
     banned = {user.name.lower() for user in
-                reddit.get_subreddit(SUBREDDIT).get_banned()}
+                reddit.get_subreddit(config.SUBREDDIT).get_banned()}
     return banned
 
 @handle_api_exceptions()
 def send_modmail(subject, body, reddit):
     """Send a message to the bot moderators"""
-    if SUBREDDIT:
-        sub = reddit.get_subreddit(SUBREDDIT)
+    if config.SUBREDDIT:
+        sub = reddit.get_subreddit(config.SUBREDDIT)
         reddit.send_message(sub, subject, body)
     else:
         log("Mod message not sent. No subreddit found in settings.")
@@ -232,7 +232,7 @@ def format_reply(details, opts):
     output = details['output'] + details['stderr']
     # Truncate the output if it contains an excessive
     # amount of line breaks or if it is too long.
-    if output.count('\n') > LINE_LIMIT:
+    if output.count('\n') > config.LINE_LIMIT:
         lines = output.split('\n')
         # If message contains an excessive amount of duplicate lines,
         # truncate to a small amount of lines to discourage spamming
@@ -261,7 +261,7 @@ def format_reply(details, opts):
     # sections of the reply until they are of adequate length. Certain
     # sections with less priority will be shortened before others.
     total_len = 0
-    for section in (FOOTER, body, head, extra):
+    for section in (config.FOOTER, body, head, extra):
         if len(section) + total_len > 9800:
             section = section[:9800 - total_len] + '\n...\n'
             total_len += len(section)
@@ -290,7 +290,7 @@ def parse_comment(body):
         r'(\n\s*((?i)Input|Stdin):?\s*\n\s*'
         r'((?<=\n( {4}))|(?<=\n\t))'
         r'(?P<in>.*(\n((( {4}|\t).*\n)|\n)*(( {4}|\t).*\n?))?))?'
-    ) % R_USERNAME
+    ) % config.R_USERNAME
     m = re.search(c_pattern, body)
     args, src, stdin = m.group('args'), m.group('src'), m.group('in') or ''
     # Remove the leading four spaces from every line.
@@ -306,9 +306,9 @@ def create_reply(comment):
     try:
         args, src, stdin = parse_comment(comment.body)
     except AttributeError:
-        preamble = ERROR_PREAMBLE.format(link=comment.permalink)
-        postamble = ERROR_POSTAMBLE.format(link=comment.permalink)
-        error_text = preamble + FORMAT_ERROR_TEXT + postamble
+        preamble = config.ERROR_PREAMBLE.format(link=comment.permalink)
+        postamble = config.ERROR_POSTAMBLE.format(link=comment.permalink)
+        error_text = preamble + config.FORMAT_ERROR_TEXT + postamble
         log("Formatting error on comment {c.permalink}".format(
             c=comment))
         return MessageReply(error_text)
@@ -325,10 +325,10 @@ def create_reply(comment):
         log("Compiled ideone submission {link} for comment {id}".format(
             link=details['link'], id=comment.id))
     except ideone.LanguageNotFoundError as e:
-        preamble = ERROR_PREAMBLE.format(link=comment.permalink)
-        postamble = ERROR_POSTAMBLE.format(link=comment.permalink)
+        preamble = config.ERROR_PREAMBLE.format(link=comment.permalink)
+        postamble = config.ERROR_POSTAMBLE.format(link=comment.permalink)
         choices = ', '.join(e.similar_languages)
-        error_text = LANG_ERROR_TEXT.format(lang=lang, choices=choices)
+        error_text = config.LANG_ERROR_TEXT.format(lang=lang, choices=choices)
         error_text = preamble + error_text + postamble
         # TODO Add link to accepted languages to msg
         log("Language error on comment {id}".format(id=comment.id))
@@ -343,19 +343,19 @@ def create_reply(comment):
         text = format_reply(details, opts)
         ideone_link = "http://ideone.com/{}".format(details['link'])
         url_pl = urllib.quote(comment.permalink)
-        text += FOOTER.format(ide_link=ideone_link, perm_link=url_pl)
+        text += config.FOOTER.format(ide_link=ideone_link, perm_link=url_pl)
     else:
         log("Result error {code} detected in comment {id}".format(
             code=result_code, id=comment.id))
-        preamble = ERROR_PREAMBLE.format(link=comment.permalink)
-        postamble = ERROR_POSTAMBLE.format(link=comment.permalink)
+        preamble = config.ERROR_PREAMBLE.format(link=comment.permalink)
+        postamble = config.ERROR_POSTAMBLE.format(link=comment.permalink)
         error_text = {
-            11: COMPILE_ERROR_TEXT,
-            12: RUNTIME_ERROR_TEXT,
-            13: TIMEOUT_ERROR_TEXT,
-            17: MEMORY_ERROR_TEXT,
-            19: ILLEGAL_ERROR_TEXT,
-            20: INTERNAL_ERROR_TEXT
+            11: config.COMPILE_ERROR_TEXT,
+            12: config.RUNTIME_ERROR_TEXT,
+            13: config.TIMEOUT_ERROR_TEXT,
+            17: config.MEMORY_ERROR_TEXT,
+            19: config.ILLEGAL_ERROR_TEXT,
+            20: config.INTERNAL_ERROR_TEXT
         }.get(result_code, '')
         # Include any output from the submission in the reply.
         if details['cmpinfo']:
@@ -381,13 +381,13 @@ def process_unread(new, r):
     log("New {type} {id} from {sender}".format(
         type="mention" if new.was_comment else "message",
         id=new.id, sender=sender))
-    if sender.name.lower() in BANNED_USERS:
+    if sender.name.lower() in config.BANNED_USERS:
         log("Ignoring banned user {user}".format(user=sender))
         return
     # Search for a user mention preceded by a '+' which is the signal
     # for CompileBot to create a reply for that comment.
     if (new.was_comment and
-        re.search(r'(?i)\+/u/{}'.format(R_USERNAME), new.body)):
+        re.search(r'(?i)\+/u/{}'.format(config.R_USERNAME), new.body)):
         reply = create_reply(new)
         if reply:
             reply.send(new)
@@ -395,10 +395,10 @@ def process_unread(new, r):
           re.match(r'(i?)\s*--help', new.body)):
         # Message a user the help text if comment is a message
         # containing "--help".
-        reply = MessageReply(HELP_TEXT, subject='CompileBot Help')
+        reply = MessageReply(config.HELP_TEXT, subject='CompileBot Help')
         reply.send(new)
     elif ((not new.was_comment) and
-          re.match(r'(i?)\s*--report', new.body) and SUBREDDIT):
+          re.match(r'(i?)\s*--report', new.body) and config.SUBREDDIT):
         # Forward a reported message to the moderators.
         send_modmail("Report from {author}".format(author=new.author),
                      new.body, r)
@@ -418,7 +418,7 @@ def process_unread(new, r):
         try:
             id = m.group('id')
         except AttributeError:
-            new.reply(RECOMPILE_ERROR_TEXT)
+            new.reply(config.RECOMPILE_ERROR_TEXT)
             return
         # Fetch the comment that will be recompiled.
         sub = r.get_submission(submission_id=id, comment_sort='best')
@@ -435,7 +435,7 @@ def process_unread(new, r):
         if original.author == new.author:
             reply = create_reply(original)
         else:
-            new.reply(RECOMPILE_AUTHOR_ERROR_TEXT)
+            new.reply(config.RECOMPILE_AUTHOR_ERROR_TEXT)
             log("Attempt to recompile on behalf of another author "
                 "detected. Request denied.")
             return
@@ -450,7 +450,7 @@ def process_unread(new, r):
             # number of comments. If the reply is buried, it will
             # not be retrieved and a new one will be created
             for rp in original.replies:
-                if rp.author.name.lower() == R_USERNAME.lower():
+                if rp.author.name.lower() == config.R_USERNAME.lower():
                     footnote = ("\n\n**EDIT:** Recompile request "
                                 "by {}".format(new.author))
                     reply.text += footnote
@@ -465,7 +465,7 @@ def process_unread(new, r):
     if reply and isinstance(reply, CompiledReply):
         # Report any potential spam to the moderators.
         spam = reply.detect_spam()
-        if spam and reply.parent_comment.subreddit.display_name not in IGNORE_SPAM:
+        if spam and reply.parent_comment.subreddit.display_name not in config.IGNORE_SPAM:
             text = ("Potential spam detected on comment {c.permalink} "
                     "by {c.author}: ".format(c=reply.parent_comment))
             text += ', '.join(spam)
@@ -474,12 +474,12 @@ def process_unread(new, r):
 
 @handle_api_exceptions()
 def main():
-    r = praw.Reddit(USER_AGENT)
+    r = praw.Reddit(config.USER_AGENT)
     # TODO update login method.
-    r.login(R_USERNAME, R_PASSWORD, disable_warning=True)
-    if SUBREDDIT:
-        global BANNED_USERS
-        BANNED_USERS = get_banned(r)
+    r.login(config.R_USERNAME, config.R_PASSWORD, disable_warning=True)
+    if config.SUBREDDIT:
+        config.BANNED_USERS
+        config.BANNED_USERS = get_banned(r)
     # Iterate though each new comment/message in the inbox and
     # process it appropriately.
     inbox = r.get_unread()
