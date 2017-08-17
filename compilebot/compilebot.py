@@ -478,7 +478,7 @@ def main():
     # TODO update login method.
     r.login(config.R_USERNAME, config.R_PASSWORD, disable_warning=True)
     if config.SUBREDDIT:
-        global config.BANNED_USERS
+        config.BANNED_USERS
         config.BANNED_USERS = get_banned(r)
     # Iterate though each new comment/message in the inbox and
     # process it appropriately.
