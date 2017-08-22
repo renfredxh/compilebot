@@ -1,6 +1,8 @@
 ---
   reddit_user: # Your reddit user name
   reddit_pass: # Your reddit password
+  reddit_client_id: # Your reddit OAuth app ID
+  reddit_client_secret: # Your reddit OAuth app secret
   ideone_user: # Your ideone username
   ideone_pass: # Your ideone password
   admin_user: # User log messages are sent to

@@ -20,10 +20,12 @@ except (OSError, IOError) as e:
 LOG_FILE = CONFIG['log_file']
 
 # Login credentials
-I_USERNAME = os.environ.get('COMPILEBOT_IDEONE_USER') or CONFIG['ideone_user']
-I_PASSWORD = os.environ.get('COMPILEBOT_IDEONE_PASS') or CONFIG['ideone_pass']
 R_USERNAME = os.environ.get('COMPILEBOT_REDDIT_USER') or CONFIG['reddit_user']
 R_PASSWORD = os.environ.get('COMPILEBOT_REDDIT_PASS') or CONFIG['reddit_pass']
+R_CLIENT_ID = os.environ.get('COMPILEBOT_REDDIT_CLIENT_ID') or CONFIG['reddit_client_id']
+R_CLIENT_SECRET = os.environ.get('COMPILEBOT_REDDIT_CLIENT_SECRET') or CONFIG['reddit_client_secret']
+I_USERNAME = os.environ.get('COMPILEBOT_IDEONE_USER') or CONFIG['ideone_user']
+I_PASSWORD = os.environ.get('COMPILEBOT_IDEONE_PASS') or CONFIG['ideone_pass']
 USER_AGENT = os.environ.get('COMPILEBOT_USER_AGENT') or CONFIG['user_agent']
 ADMIN = os.environ.get('COMPILEBOT_ADMIN') or CONFIG['admin_user']
 SUBREDDIT = os.environ.get('COMPILEBOT_SUBREDDIT') or CONFIG['subreddit']
