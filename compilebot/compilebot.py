@@ -10,6 +10,7 @@ from socket import error as SocketError
 from sys import exit
 from functools import wraps
 
+
 def handle_api_exceptions(max_attempts=1):
     """Return a function decorator that wraps a given function in a
     try-except block that will handle various exceptions that may
@@ -25,18 +26,14 @@ def handle_api_exceptions(max_attempts=1):
                 error_msg = ""
                 try:
                     return func(*args, **kwargs)
-                except praw.errors.RateLimitExceeded as e:
-                    error_msg = "Rate Limit exceeded"
-                    sleep_time = e.sleep_time
-                except praw.errors.HTTPException as e:
-                    error_msg = "HTTPError \"{error}\" occurred: ".format(
-                        error=e)
-                    # Quit when encountering an HTTP 403 "Forbidden" errors.
-                    if '403' in str(e):
-                        log(error_msg)
-                        return
                 # Handle and log miscellaneous API exceptions
-                except praw.errors.APIException as e:
+                except praw.exceptions.PRAWException as e:
+                    error_msg = "PRAW Exception \"{error}\" occurred: ".format(
+                        error=e)
+                except praw.exceptions.ClientException as e:
+                    error_msg = "Client Exception \"{error}\" occurred: ".format(
+                        error=e)
+                except praw.exceptions.APIException as e:
                     error_msg = "API Exception \"{error}\" occurred: ".format(
                         error=e)
                 except SocketError as e:
@@ -46,11 +43,12 @@ def handle_api_exceptions(max_attempts=1):
                 sleep_time = sleep_time or retries * 150
                 log("{0} in {f}. Sleeping for {t} seconds. "
                     "Attempt {rt} of {at}.".format(error_msg, f=func.__name__,
-                        t=sleep_time, rt=retries+1, at=max_attempts))
+                                                   t=sleep_time, rt=retries + 1, at=max_attempts))
                 time.sleep(sleep_time)
                 retries += 1
         return wrapper
     return decorator
+
 
 class Reply(object):
 
@@ -71,6 +69,7 @@ class Reply(object):
         """An abstract method that sends the reply."""
         raise NotImplementedError
 
+
 class CompiledReply(Reply):
 
     """Replies that contain details about evaluated code. These can be
@@ -83,7 +82,7 @@ class CompiledReply(Reply):
         self.parent_comment = None
 
     @handle_api_exceptions(max_attempts=3)
-    def send(self, comment):
+    def send(self, comment, reddit_session):
         """Send a reply to a specific reddit comment or message."""
         self.parent_comment = comment
         self.recipient = comment.author
@@ -119,6 +118,7 @@ class CompiledReply(Reply):
             return spam_triggers
         return []
 
+
 class MessageReply(Reply):
 
     """Replies that contain information that may be sent to a reddit user
@@ -130,21 +130,21 @@ class MessageReply(Reply):
         self.subject = subject
 
     @handle_api_exceptions(max_attempts=3)
-    def send(self, comment):
+    def send(self, comment, reddit):
         """Reply the author of a reddit comment by sending them a reply
         via private message.
         """
         self.recipient = comment.author
-        r = comment.reddit_session
         # If no custom subject line is given, the default will be a label
         # that identifies the comment.
         if not self.subject:
             self.subject = "Comment {id}".format(id=comment.id)
         # Prepend message subject with username
         self.subject = "{} - {}".format(config.R_USERNAME, self.subject)
-        r.send_message(self.recipient, self.subject, self.text)
+        reddit.redditor(self.recipient.name).message(self.subject, self.text)
         log("Message reply for comment {id} sent to {to}".format(
             id=comment.id, to=self.recipient))
+
 
 @handle_api_exceptions(max_attempts=3)
 def log(message, alert=False):
@@ -154,8 +154,8 @@ def log(message, alert=False):
     t = time.strftime('%y-%m-%d %H:%M:%S', time.localtime())
     message = "{}: {}\n".format(t, message)
     message = message.encode('utf8', 'replace')
-    if LOG_FILE:
-        with open(LOG_FILE, 'a') as f:
+    if config.LOG_FILE:
+        with open(config.LOG_FILE, 'a') as f:
             f.write(message)
     else:
         print(message, end='')
@@ -164,7 +164,8 @@ def log(message, alert=False):
         r.login(config.R_USERNAME, config.R_PASSWORD)
         admin_alert = message
         subject = "CompileBot Alert"
-        r.send_message(config.ADMIN, subject, admin_alert)
+        r.redditor(config.ADMIN).message(subject, admin_alert)
+
 
 @handle_api_exceptions(max_attempts=3)
 def compile(source, lang, stdin=''):
@@ -195,6 +196,7 @@ def compile(source, lang, stdin=''):
     details['link'] = sub_link
     return details
 
+
 def code_block(text):
     """Create a markdown formatted code block containing the given text"""
     text = '\n' + text
@@ -202,21 +204,24 @@ def code_block(text):
         text = text.replace(char, '\n    ')
     return text
 
+
 @handle_api_exceptions()
 def get_banned(reddit):
     """Retrieve list of banned users list from the moderator subreddit"""
     banned = {user.name.lower() for user in
-                reddit.get_subreddit(config.SUBREDDIT).get_banned()}
+              reddit.subreddit(config.SUBREDDIT).banned()}
     return banned
+
 
 @handle_api_exceptions()
 def send_modmail(subject, body, reddit):
     """Send a message to the bot moderators"""
     if config.SUBREDDIT:
-        sub = reddit.get_subreddit(config.SUBREDDIT)
-        reddit.send_message(sub, subject, body)
+        sub = reddit.subreddit(config.SUBREDDIT)
+        reddit.subreddit(sub.display_name).message(subject, body)
     else:
         log("Mod message not sent. No subreddit found in settings.")
+
 
 def format_reply(details, opts):
     """Returns a reply that contains the output from a ideone submission's
@@ -227,7 +232,7 @@ def format_reply(details, opts):
     if '--source' in opts:
         head += 'Source:\n{}\n\n'.format(code_block(details['source']))
     if '--input' in opts:
-    # Combine program output and runtime error output.
+        # Combine program output and runtime error output.
         head += 'Input:\n{}\n\n'.format(code_block(details['input']))
     output = details['output'] + details['stderr']
     # Truncate the output if it contains an excessive
@@ -268,6 +273,7 @@ def format_reply(details, opts):
     reply_text = head + body + extra
     return reply_text
 
+
 def parse_comment(body):
     """Parse a string that contains a username mention and code block
     and return the supplied arguments, source code and input.
@@ -298,6 +304,7 @@ def parse_comment(body):
     stdin = stdin.replace('\n    ', '\n')
     return args, src, stdin
 
+
 def create_reply(comment):
     """Search comments for username mentions followed by code blocks
     and return a formatted reply containing the output of the executed
@@ -306,11 +313,10 @@ def create_reply(comment):
     try:
         args, src, stdin = parse_comment(comment.body)
     except AttributeError:
-        preamble = config.ERROR_PREAMBLE.format(link=comment.permalink)
-        postamble = config.ERROR_POSTAMBLE.format(link=comment.permalink)
+        preamble = config.ERROR_PREAMBLE.format(link=comment_link(comment))
+        postamble = config.ERROR_POSTAMBLE.format(link=comment_link(comment))
         error_text = preamble + config.FORMAT_ERROR_TEXT + postamble
-        log("Formatting error on comment {c.permalink}".format(
-            c=comment))
+        log("Formatting error on comment {}".format(comment_link(comment)))
         return MessageReply(error_text)
     # Separate the language name from the rest of the supplied options.
     try:
@@ -325,8 +331,8 @@ def create_reply(comment):
         log("Compiled ideone submission {link} for comment {id}".format(
             link=details['link'], id=comment.id))
     except ideone.LanguageNotFoundError as e:
-        preamble = config.ERROR_PREAMBLE.format(link=comment.permalink)
-        postamble = config.ERROR_POSTAMBLE.format(link=comment.permalink)
+        preamble = config.ERROR_PREAMBLE.format(link=comment_link(comment))
+        postamble = config.ERROR_POSTAMBLE.format(link=comment_link(comment))
         choices = ', '.join(e.similar_languages)
         error_text = config.LANG_ERROR_TEXT.format(lang=lang, choices=choices)
         error_text = preamble + error_text + postamble
@@ -342,13 +348,13 @@ def create_reply(comment):
     if result_code == 15 or ('--include-errors' in opts and result_code in [11, 12]):
         text = format_reply(details, opts)
         ideone_link = "http://ideone.com/{}".format(details['link'])
-        url_pl = urllib.quote(comment.permalink)
+        url_pl = urllib.quote(comment_link(comment))
         text += config.FOOTER.format(ide_link=ideone_link, perm_link=url_pl)
     else:
         log("Result error {code} detected in comment {id}".format(
             code=result_code, id=comment.id))
-        preamble = config.ERROR_PREAMBLE.format(link=comment.permalink)
-        postamble = config.ERROR_POSTAMBLE.format(link=comment.permalink)
+        preamble = config.ERROR_PREAMBLE.format(link=comment_link(comment))
+        postamble = config.ERROR_POSTAMBLE.format(link=comment_link(comment))
         error_text = {
             11: config.COMPILE_ERROR_TEXT,
             12: config.RUNTIME_ERROR_TEXT,
@@ -360,16 +366,17 @@ def create_reply(comment):
         # Include any output from the submission in the reply.
         if details['cmpinfo']:
             error_text += "Compiler Output:\n\n{}\n\n".format(
-                                code_block(details['cmpinfo']))
+                code_block(details['cmpinfo']))
         if details['output']:
             error_text += "Output:\n\n{}\n\n".format(
-                    code_block(details['output']))
+                code_block(details['output']))
         if details['stderr']:
             error_text += "Error Output:\n\n{}\n\n".format(
-                                code_block(details['stderr']))
+                code_block(details['stderr']))
         error_text = preamble + error_text + postamble
         return MessageReply(error_text)
     return CompiledReply(text, details)
+
 
 @handle_api_exceptions()
 def process_unread(new, r):
@@ -387,16 +394,16 @@ def process_unread(new, r):
     # Search for a user mention preceded by a '+' which is the signal
     # for CompileBot to create a reply for that comment.
     if (new.was_comment and
-        re.search(r'(?i)\+/u/{}'.format(config.R_USERNAME), new.body)):
+            re.search(r'(?i)\+/u/{}'.format(config.R_USERNAME), new.body)):
         reply = create_reply(new)
         if reply:
-            reply.send(new)
+            reply.send(new, r)
     elif ((not new.was_comment) and
           re.match(r'(i?)\s*--help', new.body)):
         # Message a user the help text if comment is a message
         # containing "--help".
         reply = MessageReply(config.HELP_TEXT, subject='CompileBot Help')
-        reply.send(new)
+        reply.send(new, r)
     elif ((not new.was_comment) and
           re.match(r'(i?)\s*--report', new.body) and config.SUBREDDIT):
         # Forward a reported message to the moderators.
@@ -405,7 +412,7 @@ def process_unread(new, r):
         reply = MessageReply("Your message has been forwarded to the "
                              "moderators. Thank you.",
                              subject="CompileBot Report")
-        reply.send(new)
+        reply.send(new, r)
     elif ((not new.was_comment) and
           re.match(r'(i?)\s*--recompile', new.body)):
         # Search for the recompile command followed by a comment id.
@@ -421,18 +428,13 @@ def process_unread(new, r):
             new.reply(config.RECOMPILE_ERROR_TEXT)
             return
         # Fetch the comment that will be recompiled.
-        sub = r.get_submission(submission_id=id, comment_sort='best')
-        try:
-            original = sub.comments[0]
-        except IndexError:
-            # In case the comment is deleted
-            return
+        original = r.comment(id.split('/')[-1])
         log("Processing request to recompile {id} from {user}"
             "".format(id=original.id, user=new.author))
         # Ensure the author of the original comment matches the author
         # requesting the recompile to prevent one user sending a recompile
         # request on the behalf of another.
-        if original.author == new.author:
+        if original.author.name == new.author.name:
             reply = create_reply(original)
         else:
             new.reply(config.RECOMPILE_AUTHOR_ERROR_TEXT)
@@ -458,31 +460,40 @@ def process_unread(new, r):
                     break
             else:
                 # Reply to the original comment.
-                reply.send(original)
+                reply.send(original, r)
         else:
             # Send a message reply.
-            reply.send(new)
+            reply.send(new, r)
     if reply and isinstance(reply, CompiledReply):
         # Report any potential spam to the moderators.
         spam = reply.detect_spam()
         if spam and reply.parent_comment.subreddit.display_name not in config.IGNORE_SPAM:
-            text = ("Potential spam detected on comment {c.permalink} "
-                    "by {c.author}: ".format(c=reply.parent_comment))
+            text = ("Potential spam detected on comment {link} "
+                    "by {c.author}: ".format(c=reply.parent_comment, link=comment_link(reply.parent_comment)))
             text += ', '.join(spam)
             send_modmail("Potential spam detected", text, r)
             log(text)
 
+
+def comment_link(comment):
+    return "{c.submission.permalink}{c.id}".format(c=comment)
+
+
 @handle_api_exceptions()
 def main():
-    r = praw.Reddit(config.USER_AGENT)
-    # TODO update login method.
-    r.login(config.R_USERNAME, config.R_PASSWORD, disable_warning=True)
+    r = praw.Reddit(
+        user_agent=config.USER_AGENT,
+        client_id=config.R_CLIENT_ID,
+        client_secret=config.R_CLIENT_SECRET,
+        username=config.R_USERNAME,
+        password=config.R_PASSWORD,
+    )
     if config.SUBREDDIT:
         config.BANNED_USERS
         config.BANNED_USERS = get_banned(r)
     # Iterate though each new comment/message in the inbox and
     # process it appropriately.
-    inbox = r.get_unread()
+    inbox = r.inbox.unread()
     for new in inbox:
         try:
             process_unread(new, r)
@@ -492,7 +503,8 @@ def main():
             log("Error processing comment {c.id}\n"
                 "{traceback}".format(c=new, traceback=code_block(tb)), alert=True)
         finally:
-            new.mark_as_read()
+            new.mark_read()
+
 
 if __name__ == "__main__":
     main()
